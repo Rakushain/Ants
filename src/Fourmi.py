@@ -5,11 +5,12 @@ class Fourmi:
     speed = 4
     hasFood = False
 
-    def __init__(self, nid, endurance, color):
-        self.canvas = nid.canvas
-        self.nid = nid
-        self.x = nid.x
-        self.y = nid.y
+    def __init__(self, canvas, nidX, nidY, endurance, color):
+        self.canvas = canvas
+        self.nidX = nidX
+        self.nidY = nidY
+        self.x = nidX
+        self.y = nidY
         self.baseEndurance = endurance
         self.endurance = endurance
         self.color = color
@@ -20,10 +21,10 @@ class Fourmi:
         self.endurance -= 1
         if time % 5 == 0:
             if self.hasFood:
-                self.direction = np.array([self.nid.x - self.x, self.nid.y - self.y])
+                self.direction = np.array([self.nidX - self.x, self.nidY - self.y])
                 self.canvas.itemconfig(self.id, fill="gray")
             elif self.endurance <= 0:
-                self.direction = np.array([self.nid.x - self.x, self.nid.y - self.y])
+                self.direction = np.array([self.nidX - self.x, self.nidY - self.y])
                 self.canvas.itemconfig(self.id, fill="purple")
             else:
                 sumPoids = np.sum(poidsDirs)

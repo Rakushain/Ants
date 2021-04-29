@@ -8,18 +8,20 @@ from util import theta
 class Monde:
     nids = []
     nourriture = []
+    started = False
+    paused = True
 
-    def __init__(self, canvas, width, height, celluleW, celluleH):
-        celluleW = width / celluleW
-        celluleH = height / celluleH
+    def __init__(self, canvas, width, height, cellsX, cellsY):
+        self.cellW = width / cellsX
+        self.cellH = height / cellsY
         self.canvas = canvas
-        self.celluleH = celluleH
-        self.celluleW = celluleW
+        self.cellsX = cellsX
+        self.cellsY = cellsY
 
         self.grille = np.array(
             [
                 [
-                    Cellule(canvas, canvas.create_rectangle(x * celluleW, y * celluleH, (x+1) * celluleW, (y+1) * celluleH, fill="black"))
+                    Cellule(canvas, canvas.create_rectangle(x * self.cellW, y * self.cellH, (x+1) * self.cellW, (y+1) * self.cellH, outline=""))
                     for y in range(height)
                 ]
                 for x in range(width)
@@ -28,22 +30,60 @@ class Monde:
 
         self.width = width
         self.height = height
+
+        self.reset()
+
+    def start(self):
+        self.started = True
+        self.paused = False
+        print("START")
+        self.updateNids()
+        
+    def stop(self):
+        self.started = False
+        self.paused = True
+        
+    def next_frame(self):
+        self.started = True
+        self.paused = True
+        self.updateNids()
+
+    def reset(self):
+        self.stop()
+
+        for nid in self.nids:
+            for fourmi in nid.fourmis:
+                del fourmi
+            del nid
+        
+        for food in self.nourriture:
+            del food
+        
+        self.nids = []
+        self.nourriture = []
+        
         self.time = 0
 
-        self.nids.append(Nid(canvas, 250, 250, 10, 1, 200, np.array([255, 0, 0])))
+        self.nids.append(Nid(self.canvas, 250, 250, 10, 1, 200, np.array([255, 0, 0])))
         # self.nids.append(Nid(canvas, 320, 400, 6, 100, 300, np.array([0, 255, 0])))
         # self.nids.append(Nid(canvas, 250, 200, 8, 120, 50, np.array([0, 0, 255])))
         # self.nids.append(Nid(canvas, 450, 450, 4, 50, 100, np.array([0, 255, 255])))
         
-        self.nourriture.append(Nourriture(canvas, 100, 100, 20))
-        self.nourriture.append(Nourriture(canvas, 400, 400, 20))
-        self.nourriture.append(Nourriture(canvas, 100, 400, 20))
-        self.nourriture.append(Nourriture(canvas, 400, 100, 20))
+        self.nourriture.append(Nourriture(self.canvas, 100, 100, 20))
+        # self.nourriture.append(Nourriture(self.canvas, 400, 400, 20))
+        # self.nourriture.append(Nourriture(self.canvas, 100, 400, 20))
+        # self.nourriture.append(Nourriture(self.canvas, 400, 100, 20))
+    
+    def addFood(self, food):
+        self.nourriture.append(food)
 
-        self.updateNids()
-        # self.drawGrille()
+    def addNid(self, nid):
+        self.nids.append(nid)
     
     def updateNids(self):
+        if not self.started:
+            return
+        
         for nid in self.nids:
             for fourmi in nid.fourmis:
                 x, y = self.worldToGrid(fourmi.x, fourmi.y)
@@ -60,14 +100,6 @@ class Monde:
                     fourmi.hasFood = False
                     fourmi.resetEndurance()
 
-                # cellulesProches = self.grille[x-1:x+1,y-1:y+1].flatten()
-                # direction = np.random.choice(DIR_CHOICES, p=cellulesProches)
-
-                # for gX in range(x - 1, x + 1):
-                #     for gY in range(y - 1, y + 1):
-                #         if (x == gX and y == gY):
-                #             continue
-
                 possibleDirs = []
                 poidsDirs = []
 
@@ -79,59 +111,24 @@ class Monde:
                             continue
 
                         angle = theta(a, fourmi.direction)
-                        # if angle < np.pi / 2 and angle > -np.pi / 2:
                         if angle < np.pi / 2 and angle > -np.pi / 2:
                             possibleDirs.append(np.array([gX, gY]))
                             poidsDirs.append(self.grille[a[0], a[1]].pheromones[0])
-                            # self.canvas.itemconfig(self.grille[a[0], a[1]].canvasId, fill="blue")
-                            # self.canvas.after(20, lambda: self.canvas.itemconfig(self.grille[a[0], a[1]].canvasId, fill="black"))
-                        # else:
-                        #     self.canvas.itemconfig(self.grille[a[0], a[1]].canvasId, fill="black")
-
-                # if x > 0:
-                #     if theta(np.array([-1, 0]), np.array([fourmi.x, fourmi.y])) < np.pi / 2:
-                #         possibleDirs.append(np.array([-1, 0]))
-                #         poidsDirs.append(self.grille[x-1, y].pheromones[0])
-                # if x < self.width:
-                #     if theta(np.array([1, 0]), np.array([fourmi.x, fourmi.y])) < np.pi / 2:
-                #         possibleDirs.append(np.array([1, 0]))
-                #         poidsDirs.append(self.grille[x+1, y].pheromones[0])
-                # if y > 0:
-                #     if theta(np.array([0, 1]), np.array([fourmi.x, fourmi.y])) < np.pi / 2:
-                #         possibleDirs.append(np.array([0, 1]))
-                #         poidsDirs.append(self.grille[x, y-1].pheromones[0])
-                # if y > self.height:
-                #     if theta(np.array([0, -1]), np.array([fourmi.x, fourmi.y])) < np.pi / 2:
-                #         possibleDirs.append(np.array([0, -1]))
-                #         poidsDirs.append(self.grille[x, y+1].pheromones[0])
                 
                 fourmi.update(self.time, possibleDirs, np.array(poidsDirs))
+
+        
+        if self.paused:
+            return
+        
         self.time += 1
         self.canvas.after(20, self.updateNids)
-    
-    # def drawGrille(self):
-    #     for x in range(self.width):
-    #         for y in range(self.height):
-    #             self.grille[x, y].addPheromones(np.array([-0.25, -0.25, -0.25]))
-                        
-    #     self.canvas.after(1000, self.drawGrille)
-    #     pass
 
     def worldToGrid(self, x, y):
-        return int(x / self.celluleW * self.width), int(y / self.celluleH * self.height)
+        return int(x / self.cellW * self.width), int(y / self.cellH * self.height)
 
     def addPheromones(self, x, y, color):
         # TODO: fourmi qui sort du canvas = not implemented
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return
         self.grille[x, y].addPheromones(color / 255) # TODO: Color
-
-        # if decreaseLater:
-            # self.canvas.after(20, lambda: self.decreasePheromones(x, y, color * 0.95))
-            # print(np.sum(self.grille[x, y].pheromones)>0)
-            # self.addPheromones(x, y, -color * 0.5 / 255, np.sum(self.grille[x, y].pheromones) > 0) # TODO: Color
-
-    # def decreasePheromones(self, x, y, color):
-    #     self.grille[x, y].addPheromones(-color / 255) # TODO: Color
-        # self.canvas.itemconfig(self.grille[x, y].canvasId, fill=rgbtohex(self.grille[x, y].pheromones * 255))
-
