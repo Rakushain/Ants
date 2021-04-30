@@ -9,7 +9,7 @@ BG_COLOR = "#F1F1F1"
 
 
 class MainGUI:
-    def __init__(self, canvasW, canvasH, cellsX, cellsY):
+    def __init__(self, canvasW, canvasH, cellsX, cellsY, maxFood, maxNests):
         self.root = tk.Tk()
         self.root.configure(bg=BG_COLOR)
         self.root.title("Ants")
@@ -23,7 +23,7 @@ class MainGUI:
         self.create_canvas()
         self.create_frame_bottom()
 
-        self.world = World(self.canvas, self.canvasW, self.canvasH, 50, 50)
+        self.world = World(self.canvas, self.canvasW, self.canvasH, cellsX, cellsY, maxFood, maxNests)
 
         self.root.mainloop()
 
@@ -77,7 +77,13 @@ class MainGUI:
         button_new = tk.Button(
             frame,
             text="Nouveau Monde",
-            command=self.create_world)
+            command=lambda: self.create_world())
+        button_new.pack(side=tk.LEFT)
+
+        button_new = tk.Button(
+            frame,
+            text="Charger Monde",
+            command=lambda: self.world.loadMap([], []))
         button_new.pack(side=tk.LEFT)
 
         foodOrNestRadioFrame = tk.Frame(frame)

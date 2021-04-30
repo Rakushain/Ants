@@ -8,7 +8,6 @@ class Food:
         self.amount = maxAmount
         self.x = x
         self.y = y
-        # self.idOut = create_circle(canvas, x, y, maxAmount, "gray")
         self.idIn = create_circle(canvas, x, y, maxAmount, "white")
 
     def decrease(self, amount):
