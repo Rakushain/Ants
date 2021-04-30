@@ -12,9 +12,9 @@ def rgbtohex(rgb):
     r, g, b = rgb
     return f'#{floor(r):02x}{floor(g):02x}{floor(b):02x}'
 
-def rotVecteur(vect, angle):
+def vectRot(vect, angle):
     rot = np.array([[cos(angle), -sin(angle)], [sin(angle), cos(angle)]])
     return np.dot(rot, vect)
 
-def theta(v, w):
+def angle(v, w):
     return np.arccos(v.dot(w)/(np.linalg.norm(v)*np.linalg.norm(w)))

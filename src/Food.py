@@ -1,6 +1,6 @@
 from util import create_circle
 
-class Nourriture:
+class Food:
     def __init__(self, canvas, x, y, maxAmount):
         self.canvas = canvas
         self.maxAmount = maxAmount

@@ -1,14 +1,15 @@
 import tkinter as tk
 import numpy as np
-from Monde import Monde
-from Nourriture import Nourriture
-from Nid import Nid
+from World import World
+from Food import Food
+from Nest import Nest
 import sys
 
 class MainGUI:
     def __init__(self, canvasW, canvasH, cellsX, cellsY): 
         self.root = tk.Tk()
-        self.root.title("Fourmis")
+        self.root.configure(bg='#F1F1F1')
+        self.root.title("Ants")
         # root.resizable(0,0)
         self.root.wm_attributes("-topmost", 1)
 
@@ -18,48 +19,47 @@ class MainGUI:
         self.labelframe_top()
         self.canvas = tk.Canvas(self.root, width=canvasW, height=canvasH, bd=0, highlightthickness=0)
         
-        self.monde = Monde(self.canvas, self.canvasW, self.canvasH, 50, 50)
+        self.world = World(self.canvas, self.canvasW, self.canvasH, 50, 50)
         self.canvas.bind("<Button-1>", self.handleCanvasClick)
 
-        self.foodOrNid = tk.IntVar(0)
-        foodRadio = tk.Radiobutton(self.root, text="Nourriture", variable=self.foodOrNid, value=0)
+        self.foodOrNest = tk.IntVar(0)
+        foodRadio = tk.Radiobutton(self.root, text="Food", variable=self.foodOrNest, value=0)
         foodRadio.pack()
-        nidRadio = tk.Radiobutton(self.root, text="Nid", variable=self.foodOrNid, value=1)
-        nidRadio.pack()
+        nestRadio = tk.Radiobutton(self.root, text="Nest", variable=self.foodOrNest, value=1)
+        nestRadio.pack()
 
-        self.canvas.pack()
+        self.canvas.pack(padx=16, pady=16)
         self.root.mainloop()
-
 
     def create_world(self):
         self.canvas.delete("all")
-        self.monde.reset()
+        self.world.reset()
         print(sys.getrefcount(self.canvas))
         
     def handleCanvasClick(self, event):
         print(event.x, event.y)
-        if self.monde.started:
+        if self.world.started:
             return
         
-        if self.foodOrNid.get() == 0:
+        if self.foodOrNest.get() == 0:
             print('FOOD')
-            self.monde.addFood(Nourriture(self.canvas, event.x, event.y, 20))
-        elif self.foodOrNid.get() == 1:
-            print('NID')
-            self.monde.addNid(Nid(self.canvas, event.x, event.y, 10, 100, 200, np.array([255, 0, 0])))
+            self.world.addFood(Food(self.canvas, event.x, event.y, 20))
+        elif self.foodOrNest.get() == 1:
+            print('NEST')
+            self.world.addNest(Nest(self.canvas, event.x, event.y, 10, 100, 200, np.array([255, 0, 0])))
 
 
     def labelframe_top (self):
         labelframe = tk.LabelFrame(self.root)
         labelframe.pack(fill="both", expand="yes")
 
-        button_new = tk.Button(labelframe, text="Nouveau Monde", command=self.create_world)
+        button_new = tk.Button(labelframe, text="Nouveau World", command=self.create_world)
         button_new.pack(side=tk.LEFT)
         
-        button_start = tk.Button(labelframe, text="GO", command=lambda: self.monde.start())
+        button_start = tk.Button(labelframe, text="GO", command=lambda: self.world.start())
         button_start.pack(side=tk.LEFT)
 
-        button_start = tk.Button(labelframe, text="->", command=lambda: self.monde.next_frame())
+        button_start = tk.Button(labelframe, text="->", command=lambda: self.world.next_frame())
         button_start.pack(side=tk.LEFT)
 
         labelframe.pack(fill="both", padx=5, pady=5)

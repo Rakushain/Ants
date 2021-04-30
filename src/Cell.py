@@ -1,7 +1,7 @@
 import numpy as np
 from util import rgbtohex
 
-class Cellule:
+class Cell:
     def __init__(self, canvas, canvasId):
         self.canvas = canvas
         self.canvasId = canvasId
