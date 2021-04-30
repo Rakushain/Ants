@@ -111,8 +111,8 @@ class World:
                                 0 or a[1] >= self.height or (gX == 0 and gY == 0)):
                             continue
 
-                        angle = angle(a, ant.direction)
-                        if angle < np.pi / 2 and angle > -np.pi / 2:
+                        _angle = angle(a, ant.direction)
+                        if _angle < np.pi / 2 and _angle > -np.pi / 2:
                             possibleDirs.append(np.array([gX, gY]))
                             dirWeights.append(
                                 self.grille[a[0], a[1]].pheromones[0])
