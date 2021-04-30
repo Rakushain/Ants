@@ -96,7 +96,7 @@ class World:
                             ant.hasFood = True
 
                 if sqrt((ant.x - nest.x)**2 +
-                        (ant.y - nest.y)**2) <= nest.taille:
+                        (ant.y - nest.y)**2) <= nest.size:
                     ant.hasFood = False
                     ant.resetStamina()
 

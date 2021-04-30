@@ -4,14 +4,14 @@ import weakref
 
 
 class Nest:
-    def __init__(self, canvas, x, y, taille, nAnts, stamina, color):
+    def __init__(self, canvas, x, y, nAnts, stamina, color):
         self.canvas = canvas
         self.x = x
         self.y = y
-        self.taille = taille
+        self.size = nAnts / 2
         self.color = color
         hexColor = rgbtohex(color)
-        self.id = create_circle(canvas, x, y, taille, hexColor)
+        self.id = create_circle(canvas, x, y, self.size, hexColor)
 
         self.ants = [Ant(self.canvas, x, y, stamina, hexColor)
                      for _ in range(nAnts)]

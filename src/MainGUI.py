@@ -13,8 +13,6 @@ class MainGUI:
         self.root = tk.Tk()
         self.root.configure(bg=BG_COLOR)
         self.root.title("Ants")
-        # root.resizable(0,0)
-        self.root.wm_attributes("-topmost", 1)
 
         self.canvasW = canvasW
         self.canvasH = canvasH
@@ -39,17 +37,27 @@ class MainGUI:
         if self.world.started:
             return
 
+        try:
+            amount = int(self.foodOrNestAmountInput.get())
+        except ValueError:
+            return
+
+        if amount <= 0:
+            return
+
+        print(amount)
+
         if self.foodOrNest.get() == 0:
             print('FOOD')
-            self.world.addFood(Food(self.canvas, event.x, event.y, 20))
+            self.world.addFood(Food(self.canvas, event.x, event.y, amount))
         elif self.foodOrNest.get() == 1:
             print('NEST')
             self.world.addNest(
-                Nest(self.canvas, event.x, event.y, 10, 100, 200, np.array([255, 0, 0])))
+                Nest(self.canvas, event.x, event.y, amount, 200, np.array([255, 0, 0])))
 
     def create_canvas(self):
         frame = tk.Frame(self.root)
-        
+
         self.canvas = tk.Canvas(
             frame,
             width=self.canvasW,
@@ -76,16 +84,20 @@ class MainGUI:
 
         foodRadio = tk.Radiobutton(
             foodOrNestRadioFrame,
-            text="Food",
+            text="Nourriture",
             variable=self.foodOrNest,
             value=0)
-        foodRadio.pack()
+        foodRadio.pack(side=tk.LEFT)
         nestRadio = tk.Radiobutton(
             foodOrNestRadioFrame,
-            text="Nest",
+            text="Nid",
             variable=self.foodOrNest,
             value=1)
-        nestRadio.pack()
+        nestRadio.pack(side=tk.LEFT)
+
+        self.foodOrNestAmountInput = tk.Entry(foodOrNestRadioFrame)
+        self.foodOrNestAmountInput.insert(0, "20")
+        self.foodOrNestAmountInput.pack(side=tk.LEFT)
 
         foodOrNestRadioFrame.pack()
 
@@ -94,7 +106,6 @@ class MainGUI:
     def create_frame_bottom(self):
         frame = tk.Frame(self.root, bg='grey')
 
-        
         button_start = tk.Button(
             frame,
             text="GO =>",
