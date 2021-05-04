@@ -1,3 +1,4 @@
+import numpy as np
 from Ant import Ant
 from util import rgbtohex, create_circle
 import weakref
@@ -10,6 +11,7 @@ class Nest:
         self.y = y
         self.size = nAnts / 2
         self.color = color
+        self.invColor = np.array([255 - val for val in color])
         hexColor = rgbtohex(color)
         self.id = create_circle(canvas, x, y, self.size, hexColor)
 

@@ -5,6 +5,10 @@ from Food import Food
 from Nest import Nest
 import sys
 
+class FoodOrNest:
+    FOOD = 0
+    NEST = 1
+
 BG_COLOR = "#F1F1F1"
 
 
@@ -17,18 +21,24 @@ class MainGUI:
         self.canvasW = canvasW
         self.canvasH = canvasH
 
-        self.foodOrNest = tk.IntVar(0)
+        self.foodOrNest = tk.IntVar(value=FoodOrNest.NEST)
 
         self.create_frame_top()
         self.create_canvas()
         self.create_frame_bottom()
 
-        self.world = World(self.canvas, self.canvasW, self.canvasH, cellsX, cellsY, maxFood, maxNests)
+        self.world = World(
+            self.canvas,
+            self.canvasW,
+            self.canvasH,
+            cellsX,
+            cellsY,
+            maxFood,
+            maxNests)
 
         self.root.mainloop()
 
     def create_world(self):
-        self.canvas.delete("all")
         self.world.reset()
         print(sys.getrefcount(self.canvas))
 
@@ -47,10 +57,10 @@ class MainGUI:
 
         print(amount)
 
-        if self.foodOrNest.get() == 0:
+        if self.foodOrNest.get() == FoodOrNest.FOOD:
             print('FOOD')
             self.world.addFood(Food(self.canvas, event.x, event.y, amount))
-        elif self.foodOrNest.get() == 1:
+        elif self.foodOrNest.get() == FoodOrNest.NEST:
             print('NEST')
             self.world.addNest(
                 Nest(self.canvas, event.x, event.y, amount, 200, np.array([255, 0, 0])))
@@ -92,13 +102,13 @@ class MainGUI:
             foodOrNestRadioFrame,
             text="Nourriture",
             variable=self.foodOrNest,
-            value=0)
+            value=FoodOrNest.FOOD)
         foodRadio.pack(side=tk.LEFT)
         nestRadio = tk.Radiobutton(
             foodOrNestRadioFrame,
             text="Nid",
             variable=self.foodOrNest,
-            value=1)
+            value=FoodOrNest.NEST)
         nestRadio.pack(side=tk.LEFT)
 
         self.foodOrNestAmountInput = tk.Entry(foodOrNestRadioFrame)

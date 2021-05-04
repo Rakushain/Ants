@@ -11,8 +11,10 @@ class World:
     food = []
     started = False
     paused = True
+    time = 0
 
-    def __init__(self, canvas, width, height, cellsX, cellsY, maxFood, maxNests):
+    def __init__(self, canvas, width, height,
+                 cellsX, cellsY, maxFood, maxNests):
         self.cellW = width / cellsX
         self.cellH = height / cellsY
         self.canvas = canvas
@@ -21,17 +23,10 @@ class World:
         self.maxFood = maxFood
         self.maxNests = maxNests
 
-        self.grille = np.array(
+        self.grid = np.array(
             [
                 [
-                    Cell(
-                        canvas,
-                        canvas.create_rectangle(
-                            x * self.cellW,
-                            y * self.cellH,
-                            (x + 1) * self.cellW,
-                            (y + 1) * self.cellH,
-                            outline=""), maxNests)
+                    Cell(self, x, y)
                     for y in range(cellsX)
                 ]
                 for x in range(cellsY)
@@ -63,11 +58,18 @@ class World:
 
         for nest in self.nests:
             for ant in nest.ants:
+                self.canvas.delete(ant.id)
                 del ant
+            self.canvas.delete(nest.id)
             del nest
 
         for food in self.food:
+            self.canvas.delete(food.id)
             del food
+        
+        for x in range(self.cellsY):
+            for y in range(self.cellsX):
+                self.grid[x][y].resetPheromones()
 
         self.nests = []
         self.food = []
@@ -83,7 +85,7 @@ class World:
         if (len(self.nests) >= self.maxNests):
             return
         self.nests.append(nest)
-    
+
     def loadMap(self, nests, food):
         # TODO: xd
         # self.nests = nests.copy()
@@ -93,7 +95,8 @@ class World:
         self.addFood(Food(self.canvas, 490, 447, 20))
         self.addFood(Food(self.canvas, 573, 263, 20))
 
-        self.addNest(Nest(self.canvas, 443, 289, 20, 200, np.array([255, 0, 0])))
+        self.addNest(Nest(self.canvas, 443, 289, 20,
+                     200, np.array([255, 0, 0])))
 
     def updateNests(self):
         if not self.started:
@@ -132,7 +135,7 @@ class World:
                         if _angle < np.pi / 2 and _angle > -np.pi / 2:
                             possibleDirs.append(np.array([gX, gY]))
                             dirWeights.append(
-                                self.grille[a[0], a[1]].pheromones[nestId].amount)
+                                self.grid[a[0], a[1]].pheromones[nestId].amount)
 
                 ant.update(self.time, possibleDirs, np.array(dirWeights))
 
@@ -144,14 +147,11 @@ class World:
 
     def worldToGrid(self, x, y):
         return int(x / self.width * self.cellsX), int(y /
-                                                     self.height * self.cellsY)
+                                                      self.height * self.cellsY)
 
     def addPheromones(self, x, y, nestId):
         # TODO: fourmi qui sort du canvas => not implemented
-        print("LOL1")
         if x < 0 or x > self.cellsX or y < 0 or y > self.cellsY:
-            print("LOLTAMER")
             return
-        print("LOL2")
         # TODO: variable amount
-        self.grille[x, y].addPheromones(nestId, 0.1)  # TODO: Color
+        self.grid[x, y].addPheromones(nestId, 0.1)  # TODO: Color
