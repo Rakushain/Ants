@@ -66,7 +66,7 @@ class World:
         for food in self.food:
             self.canvas.delete(food.id)
             del food
-        
+
         for x in range(self.cellsY):
             for y in range(self.cellsX):
                 self.grid[x][y].resetPheromones()

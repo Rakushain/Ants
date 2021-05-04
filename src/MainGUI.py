@@ -5,9 +5,11 @@ from Food import Food
 from Nest import Nest
 import sys
 
+
 class FoodOrNest:
     FOOD = 0
     NEST = 1
+
 
 BG_COLOR = "#F1F1F1"
 
