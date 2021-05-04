@@ -17,19 +17,19 @@ class Cell:
                 world, i, 0) for i in range(
                 world.maxNests)]
 
-    def addPheromones(self, nestId, amount, decreaseLater=True):
-        nest = self.pheromones[nestId]
+    def addPheromones(self, speciesId, amount, decreaseLater=True):
+        nest = self.pheromones[speciesId]
         nest.addPheromones(amount)
 
         # TODO: all nests
 
         self.world.canvas.itemconfig(
             self.canvasId, fill=rgbtohex(
-                self.pheromones[nestId].currentColor))
+                self.pheromones[speciesId].currentColor))
 
-        if decreaseLater and np.sum(self.pheromones[nestId].amount) > 0:
+        if decreaseLater and np.sum(self.pheromones[speciesId].amount) > 0:
             self.world.canvas.after(
-                25000, lambda: self.addPheromones(nestId, -amount, False))
+                25000, lambda: self.addPheromones(speciesId, -amount, False))
 
     def resetPheromones(self):
         self.world.canvas.itemconfig(self.canvasId, fill='white')

@@ -88,26 +88,7 @@ class MainGUI:
         frame = tk.Frame(self.root)
         frame.pack(fill="both")
 
-        loadWorldOptions = []
-        for (_, _, filenames) in walk(WORLDS_FOLDER):
-            for filename in filenames:
-                print('file', filename)
-                if (filename.endswith('.json')):
-                    loadWorldOptions.append(filename)
-
-        print(loadWorldOptions)
-
-        if (len(loadWorldOptions) > 0):
-            loadWorldVar = tk.StringVar()
-            loadWorldVar.set('Nouveau Monde')
-
-            loadWorldDrop = tk.OptionMenu(
-                frame,
-                loadWorldVar,
-                'Nouveau Monde',
-                *loadWorldOptions,
-                command=lambda filename: self.world.loadWorld(filename) if filename != 'Nouveau Monde' else self.world.reset())
-            loadWorldDrop.pack(side=tk.LEFT)
+        self.create_worlds_dropdown(frame)
 
         foodOrNestRadioFrame = tk.Frame(frame)
 
@@ -131,6 +112,29 @@ class MainGUI:
         foodOrNestRadioFrame.pack()
 
         frame.pack(fill="both", padx=5, pady=5)
+
+    def create_worlds_dropdown(self, frame):
+        loadWorldOptions = []
+        for (_, _, filenames) in walk(WORLDS_FOLDER):
+            for filename in filenames:
+                print('file', filename)
+                if (filename.endswith('.json')):
+                    loadWorldOptions.append(filename)
+
+        if (len(loadWorldOptions) <= 0):
+            return
+
+        loadWorldVar = tk.StringVar()
+        loadWorldVar.set('Nouveau Monde')
+
+        loadWorldDrop = tk.OptionMenu(
+            frame,
+            loadWorldVar,
+            'Nouveau Monde',
+            *loadWorldOptions,
+            command=lambda filename: self.world.loadWorld(filename) if filename != 'Nouveau Monde' else self.world.reset())
+
+        loadWorldDrop.pack(side=tk.LEFT)
 
     def create_frame_bottom(self):
         frame = tk.Frame(self.root, bg='grey')

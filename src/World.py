@@ -4,6 +4,7 @@ from Nest import Nest
 from Cell import Cell
 from math import sqrt
 from util import angle
+from Species import Species
 import json
 
 
@@ -13,6 +14,13 @@ class World:
     started = False
     paused = True
     time = 0
+
+    species = [
+        Species(np.array([255, 0, 0])),
+        Species(np.array([0, 255, 0])),
+        Species(np.array([0, 0, 255])),
+        Species(np.array([255, 255, 0])),
+    ]
 
     def __init__(self, canvas, width, height,
                  cellsX, cellsY, maxFood, maxNests):
@@ -103,17 +111,7 @@ class World:
 
             for nest in world_data['nests']:
                 self.addNest(Nest(
-                    self.canvas, nest['x'], nest['y'], nest['size'], 200, np.array([255, 0, 0])))
-        # TODO: xd
-        # self.nests = nests.copy()
-        # self.food = food.copy()
-        # self.addFood(Food(self.canvas, 366, 167, 20))
-        # self.addFood(Food(self.canvas, 278, 285, 20))
-        # self.addFood(Food(self.canvas, 490, 447, 20))
-        # self.addFood(Food(self.canvas, 573, 263, 20))
-
-        # self.addNest(Nest(self.canvas, 443, 289, 20,
-        #              200, np.array([255, 0, 0])))
+                    self, nest['x'], nest['y'], nest['species'], nest['size'], 200))
 
     def updateNests(self):
         if not self.started:
