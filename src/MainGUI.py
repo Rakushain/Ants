@@ -26,6 +26,9 @@ class MainGUI:
         self.canvasH = canvasH
 
         self.foodOrNest = tk.IntVar(value=FoodOrNest.FOOD)
+        self.speciesId = tk.IntVar(value=0)
+        self.isModifying = tk.BooleanVar(value=False)
+        self.isModifying.trace('w', self.on_modif_state_change)
 
         self.create_frame_top()
         self.create_canvas()
@@ -48,7 +51,7 @@ class MainGUI:
 
     def handleCanvasClick(self, event):
         print(event.x, event.y)
-        if self.world.started:
+        if (not self.isModifying.get()) or self.world.started:
             return
 
         try:
@@ -62,12 +65,10 @@ class MainGUI:
         print(amount)
 
         if self.foodOrNest.get() == FoodOrNest.FOOD:
-            print('FOOD')
             self.world.addFood(Food(self.canvas, event.x, event.y, amount))
         elif self.foodOrNest.get() == FoodOrNest.NEST:
-            print('NEST')
             self.world.addNest(
-                Nest(self.canvas, event.x, event.y, amount, 200, np.array([255, 0, 0])))
+                Nest(self.world, event.x, event.y, self.speciesId.get(), amount))
 
     def create_canvas(self):
         frame = tk.Frame(self.root)
@@ -90,6 +91,8 @@ class MainGUI:
 
         self.create_worlds_dropdown(frame)
 
+        self.create_species_select(frame)
+
         foodOrNestRadioFrame = tk.Frame(frame)
 
         foodRadio = tk.Radiobutton(
@@ -109,15 +112,51 @@ class MainGUI:
         self.foodOrNestAmountInput.insert(0, "20")
         self.foodOrNestAmountInput.pack(side=tk.LEFT)
 
-        foodOrNestRadioFrame.pack()
+        foodOrNestRadioFrame.pack(side=tk.LEFT)
 
         frame.pack(fill="both", padx=5, pady=5)
+
+    def create_species_select(self, frame):
+        self.modif_button = tk.Button(
+            frame,
+            text='OK' if self.isModifying.get() else 'Modifier',
+            command=lambda: self.isModifying.set(
+                not self.isModifying.get()))
+        self.modif_button.pack(side=tk.LEFT)
+
+        frameParent = tk.Frame(frame)
+        frameTop = tk.Frame(frameParent)
+        frameBtm = tk.Frame(frameParent)
+
+        self.species_radios = []
+
+        for i in range(4):
+            radio = tk.Radiobutton(
+                frameTop if i < 2 else frameBtm,
+                text=f"Espece {i + 1}",
+                variable=self.speciesId,
+                value=i,
+                state=tk.NORMAL if self.isModifying.get() else tk.DISABLED)
+            radio.pack(side=tk.LEFT)
+
+            self.species_radios.append(radio)
+
+        frameTop.pack(side=tk.TOP)
+        frameBtm.pack(side=tk.BOTTOM)
+        frameParent.pack(side=tk.LEFT)
+
+    def on_modif_state_change(self, *_):
+        self.modif_button.configure(
+            text='OK' if self.isModifying.get() else 'Modifier')
+
+        for radio in self.species_radios:
+            radio.configure(
+                state=tk.NORMAL if self.isModifying.get() else tk.DISABLED)
 
     def create_worlds_dropdown(self, frame):
         loadWorldOptions = []
         for (_, _, filenames) in walk(WORLDS_FOLDER):
             for filename in filenames:
-                print('file', filename)
                 if (filename.endswith('.json')):
                     loadWorldOptions.append(filename)
 

@@ -16,10 +16,10 @@ class World:
     time = 0
 
     species = [
-        Species(np.array([255, 0, 0])),
-        Species(np.array([0, 255, 0])),
-        Species(np.array([0, 0, 255])),
-        Species(np.array([255, 255, 0])),
+        Species(np.array([255, 0, 0]), 1, 300),
+        Species(np.array([0, 255, 0]), 1, 300),
+        Species(np.array([0, 0, 255]), 1, 300),
+        Species(np.array([255, 255, 0]), 1, 300),
     ]
 
     def __init__(self, canvas, width, height,
@@ -111,7 +111,12 @@ class World:
 
             for nest in world_data['nests']:
                 self.addNest(Nest(
-                    self, nest['x'], nest['y'], nest['species'], nest['size'], 200))
+                    self, nest['x'], nest['y'], nest['species'], nest['size']))
+
+    def modifSpecies(self, speciesId, speed, stamina):
+        species = self.species[speciesId]
+        species.speed = speed
+        species.stamina = stamina
 
     def updateNests(self):
         if not self.started:
