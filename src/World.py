@@ -4,6 +4,7 @@ from Nest import Nest
 from Cell import Cell
 from math import sqrt
 from util import angle
+import json
 
 
 class World:
@@ -86,17 +87,33 @@ class World:
             return
         self.nests.append(nest)
 
-    def loadMap(self, nests, food):
+    def loadWorld(self, worldFile):
+        self.reset()
+        with open(f"worlds/{worldFile}") as file:
+            data = file.read()
+            world_data = json.loads(data)
+
+            for food in world_data['food']:
+                self.addFood(
+                    Food(
+                        self.canvas,
+                        food['x'],
+                        food['y'],
+                        food['size']))
+
+            for nest in world_data['nests']:
+                self.addNest(Nest(
+                    self.canvas, nest['x'], nest['y'], nest['size'], 200, np.array([255, 0, 0])))
         # TODO: xd
         # self.nests = nests.copy()
         # self.food = food.copy()
-        self.addFood(Food(self.canvas, 366, 167, 20))
-        self.addFood(Food(self.canvas, 278, 285, 20))
-        self.addFood(Food(self.canvas, 490, 447, 20))
-        self.addFood(Food(self.canvas, 573, 263, 20))
+        # self.addFood(Food(self.canvas, 366, 167, 20))
+        # self.addFood(Food(self.canvas, 278, 285, 20))
+        # self.addFood(Food(self.canvas, 490, 447, 20))
+        # self.addFood(Food(self.canvas, 573, 263, 20))
 
-        self.addNest(Nest(self.canvas, 443, 289, 20,
-                     200, np.array([255, 0, 0])))
+        # self.addNest(Nest(self.canvas, 443, 289, 20,
+        #              200, np.array([255, 0, 0])))
 
     def updateNests(self):
         if not self.started:

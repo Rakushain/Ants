@@ -4,6 +4,7 @@ from World import World
 from Food import Food
 from Nest import Nest
 import sys
+from os import walk
 
 
 class FoodOrNest:
@@ -12,6 +13,7 @@ class FoodOrNest:
 
 
 BG_COLOR = "#F1F1F1"
+WORLDS_FOLDER = "worlds"
 
 
 class MainGUI:
@@ -23,7 +25,7 @@ class MainGUI:
         self.canvasW = canvasW
         self.canvasH = canvasH
 
-        self.foodOrNest = tk.IntVar(value=FoodOrNest.NEST)
+        self.foodOrNest = tk.IntVar(value=FoodOrNest.FOOD)
 
         self.create_frame_top()
         self.create_canvas()
@@ -86,17 +88,26 @@ class MainGUI:
         frame = tk.Frame(self.root)
         frame.pack(fill="both")
 
-        button_new = tk.Button(
-            frame,
-            text="Nouveau Monde",
-            command=lambda: self.create_world())
-        button_new.pack(side=tk.LEFT)
+        loadWorldOptions = []
+        for (_, _, filenames) in walk(WORLDS_FOLDER):
+            for filename in filenames:
+                print('file', filename)
+                if (filename.endswith('.json')):
+                    loadWorldOptions.append(filename)
 
-        button_new = tk.Button(
-            frame,
-            text="Charger Monde",
-            command=lambda: self.world.loadMap([], []))
-        button_new.pack(side=tk.LEFT)
+        print(loadWorldOptions)
+
+        if (len(loadWorldOptions) > 0):
+            loadWorldVar = tk.StringVar()
+            loadWorldVar.set('Nouveau Monde')
+
+            loadWorldDrop = tk.OptionMenu(
+                frame,
+                loadWorldVar,
+                'Nouveau Monde',
+                *loadWorldOptions,
+                command=lambda filename: self.world.loadWorld(filename) if filename != 'Nouveau Monde' else self.world.reset())
+            loadWorldDrop.pack(side=tk.LEFT)
 
         foodOrNestRadioFrame = tk.Frame(frame)
 
