@@ -93,57 +93,76 @@ class MainGUI:
 
         self.create_species_select(frame)
 
-        foodOrNestRadioFrame = tk.Frame(frame)
+        self.create_food_or_nest_select(frame)
+
+        self.create_species_characteristics(frame)
+
+        frame.pack(fill="both", padx=5, pady=5)
+    
+    def create_food_or_nest_select(self, parent):
+        frame = tk.Frame(parent)
 
         foodRadio = tk.Radiobutton(
-            foodOrNestRadioFrame,
+            frame,
             text="Nourriture",
             variable=self.foodOrNest,
             value=FoodOrNest.FOOD)
-        foodRadio.pack(side=tk.LEFT)
+        foodRadio.pack(side=tk.TOP, anchor=tk.NW)
         nestRadio = tk.Radiobutton(
-            foodOrNestRadioFrame,
+            frame,
             text="Nid",
             variable=self.foodOrNest,
             value=FoodOrNest.NEST)
-        nestRadio.pack(side=tk.LEFT)
+        nestRadio.pack(side=tk.TOP, anchor=tk.NW)
 
-        self.foodOrNestAmountInput = tk.Entry(foodOrNestRadioFrame)
+        self.foodOrNestAmountInput = tk.Entry(frame)
         self.foodOrNestAmountInput.insert(0, "20")
-        self.foodOrNestAmountInput.pack(side=tk.LEFT)
+        self.foodOrNestAmountInput.pack(side=tk.LEFT, anchor=tk.NW)
 
-        foodOrNestRadioFrame.pack(side=tk.LEFT)
+        frame.pack(side=tk.LEFT)
 
-        frame.pack(fill="both", padx=5, pady=5)
-
-    def create_species_select(self, frame):
-        self.modif_button = tk.Button(
-            frame,
-            text='OK' if self.isModifying.get() else 'Modifier',
-            command=lambda: self.isModifying.set(
-                not self.isModifying.get()))
-        self.modif_button.pack(side=tk.LEFT)
-
-        frameParent = tk.Frame(frame)
-        frameTop = tk.Frame(frameParent)
-        frameBtm = tk.Frame(frameParent)
+    def create_species_select(self, parent):
+        frame = tk.Frame(parent)
 
         self.species_radios = []
 
         for i in range(4):
             radio = tk.Radiobutton(
-                frameTop if i < 2 else frameBtm,
+                frame,
                 text=f"Espece {i + 1}",
                 variable=self.speciesId,
                 value=i,
                 state=tk.NORMAL if self.isModifying.get() else tk.DISABLED)
-            radio.pack(side=tk.LEFT)
+            # radio.pack(side=tk.LEFT)
+            radio.grid(column=i%2, row=int(i/2))
 
             self.species_radios.append(radio)
 
-        frameTop.pack(side=tk.TOP)
-        frameBtm.pack(side=tk.BOTTOM)
-        frameParent.pack(side=tk.LEFT)
+        self.modif_button = tk.Button(
+            frame,
+            text='OK' if self.isModifying.get() else 'Modifier',
+            command=lambda: self.isModifying.set(
+                not self.isModifying.get()))
+        self.modif_button.grid(columnspan=2, sticky=tk.NSEW)
+
+        frame.pack(side=tk.LEFT)
+
+    def create_species_characteristics(self, parent):
+        self.create_species_characteristics_group(parent, ['speed', 'stamina', 'xd'])
+        self.create_species_characteristics_group(parent, ['speed', 'stamina', 'bruh'])
+
+    def create_species_characteristics_group(self, parent, characteristics):
+        frame = tk.Frame(parent)
+
+        for i, characteristic in enumerate(characteristics):
+            label = tk.Label(frame, text=characteristic)
+            label.grid(row=i + 1, column=1)
+
+            test = tk.Entry(frame)
+            test.insert(0, '0')
+            test.grid(row=i + 1, column=2)
+
+        frame.pack(side=tk.LEFT)
 
     def on_modif_state_change(self, *_):
         self.modif_button.configure(
@@ -153,7 +172,7 @@ class MainGUI:
             radio.configure(
                 state=tk.NORMAL if self.isModifying.get() else tk.DISABLED)
 
-    def create_worlds_dropdown(self, frame):
+    def create_worlds_dropdown(self, parent):
         loadWorldOptions = []
         for (_, _, filenames) in walk(WORLDS_FOLDER):
             for filename in filenames:
@@ -167,7 +186,7 @@ class MainGUI:
         loadWorldVar.set('Nouveau Monde')
 
         loadWorldDrop = tk.OptionMenu(
-            frame,
+            parent,
             loadWorldVar,
             'Nouveau Monde',
             *loadWorldOptions,
@@ -191,27 +210,3 @@ class MainGUI:
         button_start.pack(side=tk.LEFT)
 
         frame.pack(side="bottom", fill="both", padx=5, pady=5)
-
-        # button_about = tk.Button(
-        #     labelframe_bottom,
-        #     text="A propos",
-        #     height=0,
-        #     width=50)
-        # button_step = tk.Button(
-        #     labelframe_bottom,
-        #     text="Pas",
-        #     height=0,
-        #     width=25)
-        # button_go = tk.Button(labelframe_bottom, text="Go", height=0, width=25)
-
-        # button_about.pack(side="left")
-        # button_step.place(x=375, y=0)
-        # button_go.place(x=575, y=0)
-
-        # phero = tk.Checkbutton(labelframe_bottom, text="AfficherPhéromones")
-        # phero.place(x=775, y=0)
-
-        # labelframe_bottom.pack(side="bottom", fill="both")
-
-        # bottom = tk.Label(labelframe_bottom, bg="grey")
-        # bottom.pack(side="bottom")
