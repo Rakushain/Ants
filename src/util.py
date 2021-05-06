@@ -20,5 +20,16 @@ def vectRot(vect, angle):
     return np.dot(rot, vect)
 
 
+def distance(v, w):
+    return np.linalg.norm(w - v)
+
+
 def angle(v, w):
     return np.arccos(v.dot(w) / (np.linalg.norm(v) * np.linalg.norm(w)))
+
+
+def random_inside_circle():
+    length = np.sqrt(np.random.uniform(0, 1))
+    angle = np.pi * np.random.uniform(0, 2)
+
+    return np.array([length * np.cos(angle), length * np.sin(angle)])

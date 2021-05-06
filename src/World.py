@@ -124,40 +124,40 @@ class World:
 
         for nestId, nest in enumerate(self.nests):
             for ant in nest.ants:
-                x, y = self.worldToGrid(ant.x, ant.y)
+                x, y = self.worldToGrid(ant.pos)
 
-                if ant.hasFood:
-                    self.addPheromones(x, y, nestId)
-                else:
-                    for food in self.food:
-                        if sqrt((ant.x - food.x)**2 + (ant.y - food.y)
-                                ** 2) <= food.maxAmount and food.amount > 0:
-                            food.decrease(1)
-                            ant.hasFood = True
+                # if ant.has_food:
+                #     self.addPheromones(x, y, nestId)
+                # else:
+                #     for food in self.food:
+                #         if sqrt((ant.pos[0] - food.pos[0])**2 + (ant.pos[1] - food.pos[1])
+                #                 ** 2) <= food.maxAmount and food.amount > 0:
+                #             food.decrease(1)
+                #             ant.has_food = True
 
-                if sqrt((ant.x - nest.x)**2 +
-                        (ant.y - nest.y)**2) <= nest.size:
-                    ant.hasFood = False
-                    ant.resetStamina()
+                # if sqrt((ant.pos[0] - nest.x)**2 +
+                #         (ant.pos[1] - nest.y)**2) <= nest.size:
+                #     ant.has_food = False
+                #     ant.resetStamina()
 
-                possibleDirs = []
-                dirWeights = []
+                # possibleDirs = []
+                # dirWeights = []
 
-                for gX in range(-2, 3):
-                    for gY in range(-2, 3):
-                        a = np.array([x + gX, y + gY])
+                # for gX in range(-2, 3):
+                #     for gY in range(-2, 3):
+                #         a = np.array([x + gX, y + gY])
 
-                        if (a[0] < 0 or a[0] >= self.cellsX or a[1] <
-                                0 or a[1] >= self.cellsY or (gX == 0 and gY == 0)):
-                            continue
+                #         if (a[0] < 0 or a[0] >= self.cellsX or a[1] <
+                #                 0 or a[1] >= self.cellsY or (gX == 0 and gY == 0)):
+                #             continue
 
-                        _angle = angle(a, ant.direction)
-                        if _angle < np.pi / 2 and _angle > -np.pi / 2:
-                            possibleDirs.append(np.array([gX, gY]))
-                            dirWeights.append(
-                                self.grid[a[0], a[1]].pheromones[nestId].amount)
+                #         _angle = angle(a, ant.direction)
+                #         if _angle < np.pi / 2 and _angle > -np.pi / 2:
+                #             possibleDirs.append(np.array([gX, gY]))
+                #             dirWeights.append(
+                # self.grid[a[0], a[1]].pheromones[nestId].amount)
 
-                ant.update(self.time, possibleDirs, np.array(dirWeights))
+                ant.update(self.time)
 
         if self.paused:
             return
@@ -165,7 +165,8 @@ class World:
         self.time += 1
         self.canvas.after(20, self.updateNests)
 
-    def worldToGrid(self, x, y):
+    def worldToGrid(self, pos):
+        x, y = pos
         return int(x / self.width * self.cellsX), int(y /
                                                       self.height * self.cellsY)
 

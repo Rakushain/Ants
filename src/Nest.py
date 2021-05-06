@@ -18,5 +18,5 @@ class Nest:
         hexColor = rgbtohex(self.color)
         self.id = create_circle(self.world.canvas, x, y, self.size, hexColor)
 
-        self.ants = [Ant(self.world.canvas, x, y, species.speed, species.stamina, hexColor)
+        self.ants = [Ant(self.world, x, y, species.speed, species.stamina, hexColor)
                      for _ in range(nAnts)]

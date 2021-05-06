@@ -1,5 +1,5 @@
 import numpy as np
-from util import create_circle, vectRot
+from util import create_circle, vectRot, random_inside_circle, distance
 
 
 class Ant:
@@ -19,9 +19,13 @@ class Ant:
         direction:      Direction de la fourmi.
     """
 
-    hasFood = False
+    has_food = False
+    food_target = None
+    view_distance = 10
+    # TODO: cringe
+    food_disposal_distance = 4
 
-    def __init__(self, canvas, nestX, nestY, speed, stamina, color):
+    def __init__(self, world, nestX, nestY, speed, stamina, color):
         """
             Initialisation de la Fourmi.
 
@@ -36,19 +40,29 @@ class Ant:
                 Une nouvelle instance de Fourmi.
         """
 
-        self.canvas = canvas
-        self.nestX = nestX
-        self.nestY = nestY
-        self.x = nestX
-        self.y = nestY
-        self.speed = speed
-        self.baseStamina = stamina
+        self.world = world
+        self.nest_pos = np.array([nestX, nestY])
+
+        random_pos = random_inside_circle() * 30
+        self.pos = np.array([nestX, nestY]) + random_pos
+
+        self.speed = 4  # speed
+        self.base_stamina = stamina
         self.stamina = stamina
         self.color = color
-        self.id = create_circle(self.canvas, self.x, self.y, 2, color)
-        self.direction = np.random.uniform(-1.0, 1.0, (2))
+        self.id = create_circle(
+            self.world.canvas,
+            self.pos[0],
+            self.pos[1],
+            2,
+            color)
+        self.direction = random_inside_circle()
 
-    def update(self, time, possibleDirs, dirWeights):
+        self.steer_strength = 2
+        self.wander_strength = 1
+        self.velocity = 0
+
+    def update(self, time):
         """
             Mise a jour de la Fourmi.
 
@@ -61,36 +75,71 @@ class Ant:
                 None
         """
 
-        self.stamina -= 1
-        if time % 5 == 0:
-            if self.hasFood:
-                self.direction = np.array(
-                    [self.nestX - self.x, self.nestY - self.y])
-                self.canvas.itemconfig(self.id, fill="gray")
-            elif self.stamina <= 0:
-                self.direction = np.array(
-                    [self.nestX - self.x, self.nestY - self.y])
-                self.canvas.itemconfig(self.id, fill="purple")
-            else:
-                sumPoids = np.sum(dirWeights)
-                # Si il n'y a pas de pheromones, garder la meme direction
-                if sumPoids > 0:
-                    self.direction = possibleDirs[np.random.choice(
-                        len(possibleDirs), p=dirWeights / np.sum(dirWeights))]
-                else:
-                    self.direction = vectRot(
-                        self.direction, np.random.uniform(-np.pi / 4, np.pi / 4))
-                self.canvas.itemconfig(self.id, fill=self.color)
+        self.check_nest()
 
-        x, y = self.direction / np.linalg.norm(self.direction)
-        # TODO: optimiser (2x meme calcul)
-        self.canvas.move(self.id, x * self.speed, y * self.speed)
-        self.x += x * self.speed
-        self.y += y * self.speed
+        self.wander()
+        self.handle_food()
+
+        desired_velocity = self.direction * self.speed
+
+        acceleration = (desired_velocity - self.velocity) * self.steer_strength
+        acceleration_magnitude = np.linalg.norm(acceleration)
+        if acceleration_magnitude > self.steer_strength:
+            acceleration = acceleration / acceleration_magnitude * self.steer_strength
+
+        self.velocity = self.velocity + acceleration
+        velocity_magnitude = np.linalg.norm(self.velocity)
+        if velocity_magnitude > self.speed:
+            self.velocity = self.velocity / velocity_magnitude * self.speed
+
+        self.pos += self.velocity
+        self.world.canvas.move(self.id, self.velocity[0], self.velocity[1])
+    
+    def wander(self):
+        self.direction = (
+            self.direction +
+            random_inside_circle() *
+            self.wander_strength)
+
+        self.stamina -= 1
+            
+
+    def handle_food(self):
+        if self.has_food or self.stamina <= 0:
+            self.direction = (self.nest_pos - self.pos)
+            self.direction = self.direction / np.linalg.norm(self.direction)
+        elif not self.food_target:
+            # TODO: Select rdm food
+            min_dist = np.Infinity
+            for food in self.world.food:
+                dist = distance(self.pos, food.pos)
+
+                if dist < (self.view_distance +
+                           food.scale) and dist < min_dist:
+                    min_dist = dist
+                    self.food_target = food
+
+        else:
+            food_dir = (self.food_target.pos - self.pos)
+            dist = np.linalg.norm(self.direction)
+            
+            if dist < self.food_target.scale:
+                self.has_food = True
+                self.food_target.decrease()
+            else:
+                self.direction = food_dir / dist
+    
+    def check_nest(self):
+        dist = np.linalg.norm(self.nest_pos - self.pos)
+        if dist < self.food_disposal_distance:
+            self.has_food = False
+            self.food_target = None
+            self.direction = random_inside_circle()
+            self.stamina = self.base_stamina
 
     def resetStamina(self):
         """
         Réinitialise l'endurance de la fourmi.
         """
 
-        self.stamina = self.baseStamina
+        self.stamina = self.base_stamina
