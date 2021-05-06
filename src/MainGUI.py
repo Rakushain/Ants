@@ -190,7 +190,7 @@ class MainGUI:
         max_val = characteristic_defaults['max']
 
         valid = False
-        
+
         try:
             print(str_val)
             new_val = float(str_val)
@@ -198,9 +198,10 @@ class MainGUI:
                 valid = True
         except ValueError:
             pass
-        
+
         if not valid:
-            self.spawn_wrong_value_popup(characteristic, min_val, max_val, str_val)
+            self.spawn_wrong_value_popup(
+                characteristic, min_val, max_val, str_val)
 
         return valid
 
@@ -266,7 +267,7 @@ class MainGUI:
         print('xd', self.wrong_value_popup_open)
         if self.wrong_value_popup_open:
             return
-        
+
         self.wrong_value_popup_open = True
 
         win = tk.Toplevel()
@@ -286,5 +287,5 @@ class MainGUI:
 
         b = tk.Button(win, text="Ok", command=close_win)
         b.grid(column=0, row=2)
-    
+
         # win.geometry(("%dx%d%+d%+d" % (250, 50, 750, 400)))
