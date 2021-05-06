@@ -96,7 +96,7 @@ class MainGUI:
 
         self.create_food_or_nest_select(frame)
 
-        self.create_species_characteristics(frame)
+        self.create_species_traits(frame)
 
         frame.pack(fill="both", padx=5, pady=5)
 
@@ -154,21 +154,21 @@ class MainGUI:
 
         frame.pack(side=tk.LEFT)
 
-    def create_species_characteristics(self, parent):
+    def create_species_traits(self, parent):
         frame = tk.Frame(parent)
 
-        self.species_characteristics_entries = []
+        self.species_traits_entries = []
 
         self.wrong_value_popup_open = False
 
-        for i, (characteristic, val) in enumerate(species_defaults.items()):
+        for i, (trait, val) in enumerate(species_defaults.items()):
             x = 2 * int(i / 3)
             y = i % 3
 
-            vcmd = (frame.register(self.validate_species_characteristic),
-                    characteristic, '%P')
+            vcmd = (frame.register(self.validate_species_trait),
+                    trait, '%P')
 
-            label = tk.Label(frame, text=characteristic, anchor=tk.W)
+            label = tk.Label(frame, text=trait, anchor=tk.W)
             label.grid(column=x, row=y, sticky=tk.NSEW)
 
             entry = tk.Entry(frame)
@@ -179,29 +179,28 @@ class MainGUI:
                 validatecommand=vcmd
             )
             entry.grid(column=x + 1, row=y, sticky=tk.NSEW)
-            self.species_characteristics_entries.append(entry)
+            self.species_traits_entries.append(entry)
 
         frame.pack(side=tk.LEFT)
 
-    def validate_species_characteristic(self, characteristic, str_val):
-        print('val', str_val)
-        characteristic_defaults = species_defaults[characteristic]
-        min_val = characteristic_defaults['min']
-        max_val = characteristic_defaults['max']
+    def validate_species_trait(self, trait, str_val):
+        trait_defaults = species_defaults[trait]
+        min_val = trait_defaults['min']
+        max_val = trait_defaults['max']
 
         valid = False
 
         try:
-            print(str_val)
             new_val = float(str_val)
-            if new_val >= characteristic_defaults['min'] and new_val <= characteristic_defaults['max']:
+            if new_val >= trait_defaults['min'] and new_val <= trait_defaults['max']:
+                self.world.species[self.speciesId.get()].update_trait(trait, new_val)
                 valid = True
         except ValueError:
             pass
 
         if not valid:
             self.spawn_wrong_value_popup(
-                characteristic, min_val, max_val, str_val)
+                trait, min_val, max_val, str_val)
 
         return valid
 
@@ -211,7 +210,7 @@ class MainGUI:
 
         elements = [
             *self.species_radios,
-            *self.species_characteristics_entries,
+            *self.species_traits_entries,
             self.foodRadio,
             self.nestRadio,
             self.foodOrNestAmountInput
@@ -246,11 +245,11 @@ class MainGUI:
     def create_frame_bottom(self):
         frame = tk.Frame(self.root, bg='grey')
 
-        button_start = tk.Button(
+        self.button_go = tk.Button(
             frame,
-            text="GO =>",
-            command=lambda: self.world.start())
-        button_start.pack(side=tk.LEFT)
+            text="Go =>",
+            command=self.start_stop)
+        self.button_go.pack(side=tk.LEFT)
 
         button_start = tk.Button(
             frame,
@@ -259,8 +258,16 @@ class MainGUI:
         button_start.pack(side=tk.LEFT)
 
         frame.pack(side="bottom", fill="both", padx=5, pady=5)
+    
+    def start_stop(self):
+        if(self.world.started):
+            self.world.stop()
+            self.button_go["text"] = "Go =>"
+        else:
+            self.world.start()
+            self.button_go["text"] = "Stop"
 
-    def spawn_wrong_value_popup(self, characteristic, min_val, max_val, value):
+    def spawn_wrong_value_popup(self, trait, min_val, max_val, value):
         """
         Cree un popup quand la taille d une ressource n est pas comprise entre 1 et 30
         """
@@ -278,7 +285,7 @@ class MainGUI:
             self.wrong_value_popup_open = False
 
         l = tk.Label(
-            win, text=f"Veuillez choisir une {characteristic} comprise entre {min_val} et {max_val}")
+            win, text=f"Veuillez choisir une {trait} comprise entre {min_val} et {max_val}")
         l.grid(column=0, row=0)
 
         l = tk.Label(
