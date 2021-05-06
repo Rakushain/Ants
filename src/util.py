@@ -2,12 +2,12 @@ import numpy as np
 from math import sin, cos, floor
 
 
-def create_circle(canvas, x, y, r, color):
+def create_circle(canvas, x, y, r, color, **kwargs):
     x0 = x - r
     y0 = y - r
     x1 = x + r
     y1 = y + r
-    return canvas.create_oval(x0, y0, x1, y1, fill=color)
+    return canvas.create_oval(x0, y0, x1, y1, fill=color, **kwargs)
 
 
 def rgbtohex(rgb):

@@ -46,12 +46,15 @@ class World:
         self.height = height
 
         self.reset()
+        
+
 
     def start(self):
         self.started = True
         self.paused = False
+        self.time = 0
         print("START")
-        self.updateNests()
+        self.update()
 
     def stop(self):
         self.started = False
@@ -60,14 +63,15 @@ class World:
     def next_frame(self):
         self.started = True
         self.paused = True
-        self.updateNests()
+        self.update()
 
     def reset(self):
         self.stop()
 
         for nest in self.nests:
             for ant in nest.ants:
-                self.canvas.delete(ant.id)
+                self.canvas.delete(ant.view_arc)
+                self.canvas.delete(ant.ant_circle)
                 del ant
             self.canvas.delete(nest.id)
             del nest
@@ -118,7 +122,7 @@ class World:
         species.speed = speed
         species.stamina = stamina
 
-    def updateNests(self):
+    def update(self):
         if not self.started:
             return
 
@@ -126,8 +130,8 @@ class World:
             for ant in nest.ants:
                 x, y = self.worldToGrid(ant.pos)
 
-                # if ant.has_food:
-                #     self.addPheromones(x, y, nestId)
+                if ant.has_food:
+                    self.addPheromones(x, y, nestId)
                 # else:
                 #     for food in self.food:
                 #         if sqrt((ant.pos[0] - food.pos[0])**2 + (ant.pos[1] - food.pos[1])
@@ -163,7 +167,7 @@ class World:
             return
 
         self.time += 1
-        self.canvas.after(20, self.updateNests)
+        self.canvas.after(20, self.update)
 
     def worldToGrid(self, pos):
         x, y = pos
