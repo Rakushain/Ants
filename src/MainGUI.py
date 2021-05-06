@@ -193,7 +193,8 @@ class MainGUI:
         try:
             new_val = float(str_val)
             if new_val >= trait_defaults['min'] and new_val <= trait_defaults['max']:
-                self.world.species[self.speciesId.get()].update_trait(trait, new_val)
+                self.world.species[self.speciesId.get()].update_trait(
+                    trait, new_val)
                 valid = True
         except ValueError:
             pass
@@ -258,7 +259,7 @@ class MainGUI:
         button_start.pack(side=tk.LEFT)
 
         frame.pack(side="bottom", fill="both", padx=5, pady=5)
-    
+
     def start_stop(self):
         if(self.world.started):
             self.world.stop()

@@ -11,7 +11,7 @@ class Species:
         self.color = color
         self.speed = speed
         self.stamina = stamina
-    
+
     def update_trait(self, trait, value):
         print(trait, value)
         if trait == 'speed':
