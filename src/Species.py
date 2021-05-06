@@ -1,5 +1,10 @@
 import numpy as np
 
+species_defaults = {
+    "speed": {"min": 0.1, "max": 1, "value": 0.5},
+    "stamina": {"min": 1, "max": 1000, "value": 350},
+}
+
 
 class Species:
     def __init__(self, color, speed, stamina):
