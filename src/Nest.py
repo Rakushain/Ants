@@ -13,7 +13,7 @@ class Nest:
         species = self.world.species[species_id]
 
         self.color = species.color
-        self.invColor = np.array([255 - val for val in self.color])
+        self.inv_color = np.array([255 - val for val in self.color])
         hexColor = rgbtohex(self.color)
         self.id = create_circle(self.world.canvas, x, y, self.size, hexColor)
 

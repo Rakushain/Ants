@@ -226,7 +226,7 @@ class MainGUI:
         for (_, _, filenames) in walk(WORLDS_FOLDER):
             for filename in filenames:
                 if (filename.endswith('.json')):
-                    loadWorldOptions.append(filename)
+                    loadWorldOptions.append(filename[:-5])
 
         if (len(loadWorldOptions) <= 0):
             return
@@ -239,7 +239,7 @@ class MainGUI:
             loadWorldVar,
             'Nouveau Monde',
             *loadWorldOptions,
-            command=lambda filename: self.world.loadWorld(filename) if filename != 'Nouveau Monde' else self.world.reset())
+            command=lambda filename: self.world.loadWorld(f"{filename}.json") if filename != 'Nouveau Monde' else self.world.reset())
 
         loadWorldDrop.pack(side=tk.LEFT)
 

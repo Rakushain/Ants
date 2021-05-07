@@ -25,4 +25,4 @@ class Pheromones:
     #         return
     #     self.currentColor = [
     # 255 - val * self.amount for val in
-    # self.world.nests[self.nestId].invColor]
+    # self.world.nests[self.nestId].inv_color]
