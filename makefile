@@ -10,3 +10,6 @@ ifdef M
 else
 	@echo Missing commit msg
 endif
+
+uml:
+	pyreverse -mn -p Ants ./src/__main__.py
