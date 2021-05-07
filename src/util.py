@@ -28,6 +28,12 @@ def angle(v, w):
     return np.arccos(v.dot(w) / (np.linalg.norm(v) * np.linalg.norm(w)))
 
 
+def rotate(v, angle):
+    r = np.array(([np.cos(angle), -np.sin(angle)],
+                 [np.sin(angle), np.cos(angle)]))
+    return r.dot(v)
+
+
 def random_inside_circle():
     length = np.sqrt(np.random.uniform(0, 1))
     angle = np.pi * np.random.uniform(0, 2)

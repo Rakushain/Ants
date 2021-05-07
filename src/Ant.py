@@ -1,5 +1,5 @@
 import numpy as np
-from util import create_circle, vectRot, random_inside_circle, distance
+from util import create_circle, vectRot, random_inside_circle, distance, rotate
 
 
 class Ant:
@@ -26,8 +26,7 @@ class Ant:
     # TODO: cringe
     food_disposal_distance = 4
 
-    def __init__(self, world, nest_id, ant_id, nestX,
-                 nestY, speed, stamina, color):
+    def __init__(self, world, nest, ant_id, speed, stamina, color):
         """
             Initialisation de la Fourmi.
 
@@ -43,10 +42,11 @@ class Ant:
         """
 
         self.world = world
-        self.nest_pos = np.array([nestX, nestY])
+        self.nest_pos = nest.pos
+        self.species_id = nest.species_id
 
         random_pos = random_inside_circle() * 30
-        self.pos = np.array([nestX, nestY]) + random_pos
+        self.pos = nest.pos + random_pos
 
         self.direction = random_inside_circle()
 
@@ -59,7 +59,7 @@ class Ant:
         self.stamina = stamina
         self.color = color
 
-        self.ant_id = f"{nest_id}_{ant_id}"
+        self.ant_id = f"{nest.id}_{ant_id}"
 
         self.objs = []
 
@@ -84,7 +84,7 @@ class Ant:
             2,
             color, tags=self.ant_id)
 
-    def update(self, time):
+    def update(self):
         """
             Mise a jour de la Fourmi.
 
@@ -96,8 +96,18 @@ class Ant:
             Returns:
                 None
         """
+        grid_x, grid_y = self.world.worldToGrid(self.pos)
+
+        # Test si fourmi est dans la grille
+        if grid_x >= 0 and grid_x < self.world.cellsX and grid_y >= 0 and grid_y < self.world.cellsY:
+            if self.has_food:
+                # TODO: variable amount
+                self.world.grid[grid_x, grid_y].addPheromones(
+                    self.species_id, self.pos)  # TODO: Color
 
         self.check_nest()
+
+        self.sense_pheromones()
 
         self.wander()
         self.handle_food()
@@ -116,8 +126,10 @@ class Ant:
 
         self.pos += self.velocity
         self.world.canvas.move(self.ant_id, self.velocity[0], self.velocity[1])
-        
-        self.world.canvas.itemconfigure(self.ant_circle, fill="gray" if self.stamina <= 0 else self.color)
+
+        self.world.canvas.itemconfigure(
+            self.ant_circle,
+            fill="gray" if self.stamina <= 0 else self.color)
 
         self.update_angle()
 
@@ -147,10 +159,14 @@ class Ant:
                     min_dist = dist
                     self.food_target = food
         else:
+            if self.food_target.amount <= 0:
+                self.food_target = None
+                return
+
             food_dir = (self.food_target.pos - self.pos)
             dist = np.linalg.norm(self.direction)
 
-            if dist < self.food_target.scale:
+            if dist < max(self.food_target.scale, 4):
                 self.has_food = True
                 self.food_target.decrease()
             else:
@@ -170,7 +186,7 @@ class Ant:
             np.arctan2(
                 self.velocity[1],
                 self.velocity[0]))
-        
+
         if self.has_food or self.stamina <= 0:
             self.world.canvas.itemconfigure(self.view_arc, outline="")
         else:
@@ -181,9 +197,51 @@ class Ant:
                 outline=self.color
             )
 
+    def sense_pheromones(self):
+        sensor_fwd = 2 * self.velocity
+        sensor_left = rotate(sensor_fwd, np.deg2rad(-self.view_angle / 2))
+        sensor_right = rotate(sensor_fwd, np.deg2rad(self.view_angle / 2))
+
+        pheromones = [0, 0, 0]
+        for i, sensor in enumerate([sensor_fwd, sensor_left, sensor_right]):
+            grid_x, grid_y = self.world.worldToGrid(sensor + self.pos)
+
+            top_left = np.array([grid_x - 2, grid_y - 2])
+            btm_right = np.array([grid_x + 3, grid_y + 3])
+
+            subgrid = self.world.grid[max(0, top_left[0]):min(self.world.cellsX, btm_right[0]),
+                                      max(0, top_left[1]):min(self.world.cellsX, btm_right[1]), ]
+
+            for row in subgrid:
+                for cell in row:
+                    for pheromone in cell.pheromones[self.species_id]:
+                        lifetime = self.world.time - pheromone.creation_time
+                        evaporation = max(1, lifetime / 1000)
+                        pheromones[i] += 1 - evaporation
+
+        if np.sum(pheromones) == 0:
+            return
+
+        value_fwd, value_left, value_right = pheromones
+
+        if value_fwd > max(value_left, value_right):
+            self.direction = sensor_fwd
+        elif value_left > value_right:
+            self.direction = sensor_left
+        else:
+            self.direction = sensor_right
+
     def resetStamina(self):
         """
         Réinitialise l'endurance de la fourmi.
         """
 
         self.stamina = self.base_stamina
+
+
+class Sensor:
+    def __init__(self):
+        pass
+
+    def sense_pheromones(self, position, velocity, angle):
+        pass
