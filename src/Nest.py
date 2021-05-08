@@ -4,19 +4,24 @@ from util import rgbtohex, create_circle
 
 
 class Nest:
-    def __init__(self, world, x, y, species_id, nAnts):
+    def __init__(self, world, nest_id, x, y, species_id, nAnts):
         self.world = world
         self.pos = np.array([x, y])
         self.species_id = species_id
         self.size = nAnts / 2
+        self.nest_id = nest_id
+        self.food = 0
 
         species = self.world.species[species_id]
 
         self.color = species.color
         self.inv_color = np.array([255 - val for val in self.color])
         hexColor = rgbtohex(self.color)
-        self.id = create_circle(self.world.canvas, x, y, self.size, hexColor)
+        self.canvas_id = create_circle(self.world.canvas, x, y, self.size, hexColor)
 
-        # TODO: better nest ID
         self.ants = [Ant(self.world, self, i, species.speed, species.stamina, hexColor)
                      for i in range(nAnts)]
+        
+    def addFood(self, amount):
+        self.food += amount
+        print(f"Nid {self.nest_id}: {self.food} food")

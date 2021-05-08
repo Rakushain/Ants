@@ -20,6 +20,7 @@ class Ant:
     """
 
     has_food = False
+    food_amount = 0
     food_target = None
     view_distance = 40
     view_angle = 120
@@ -43,6 +44,7 @@ class Ant:
 
         self.world = world
         self.nest_pos = nest.pos
+        self.nest_id = nest.nest_id
         self.species_id = nest.species_id
 
         random_pos = random_inside_circle() * 30
@@ -52,16 +54,22 @@ class Ant:
 
         self.steer_strength = 0.25
         self.wander_strength = 10
-        self.velocity = np.zeros(2)
-
         self.speed = 4  # speed
+        self.velocity = self.direction * self.speed
+
         self.base_stamina = stamina
         self.stamina = stamina
         self.color = color
 
-        self.ant_id = f"{nest.id}_{ant_id}"
+        self.ant_id = f"ANT_{nest.nest_id}_{ant_id}"
 
-        self.objs = []
+        self.sensors = [
+            create_circle(
+                self.world.canvas,
+                -10,
+                -10,
+                1,
+                "gray") for i in range(3)]  # TODO: Remove cringe
 
         self.view_arc = self.world.canvas.create_arc(
             self.pos[0] -
@@ -169,6 +177,7 @@ class Ant:
             if dist < max(self.food_target.scale, 4):
                 self.has_food = True
                 self.food_target.decrease()
+                self.food_amount += 1
             else:
                 self.direction = food_dir / dist
 
@@ -177,6 +186,7 @@ class Ant:
         if dist < self.food_disposal_distance:
             self.stamina = self.base_stamina
             if self.has_food:
+                self.world.nests[self.nest_id].addFood(self.food_amount)
                 self.has_food = False
                 self.food_target = None
                 self.direction = random_inside_circle()
@@ -198,16 +208,44 @@ class Ant:
             )
 
     def sense_pheromones(self):
-        sensor_fwd = 2 * self.velocity
-        sensor_left = rotate(sensor_fwd, np.deg2rad(-self.view_angle / 2))
-        sensor_right = rotate(sensor_fwd, np.deg2rad(self.view_angle / 2))
+        sensor_fwd = self.view_distance * \
+            self.velocity / np.linalg.norm(self.velocity)
+        sensor_left = rotate(sensor_fwd,
+                             np.deg2rad(-self.view_angle / 2)) + self.pos
+        sensor_right = rotate(
+            sensor_fwd, np.deg2rad(
+                self.view_angle / 2)) + self.pos
+        sensor_fwd += self.pos
+
+        #TODO: cringe
+        # sensor_fwd_circle, sensor_left_circle, sensor_right_circle = self.sensors
+        # self.world.canvas.coords(
+        #     sensor_fwd_circle,
+        #     sensor_fwd[0] - self.world.cellW,
+        #     sensor_fwd[1] - self.world.cellH,
+        #     sensor_fwd[0] + self.world.cellW,
+        #     sensor_fwd[1] + self.world.cellH)
+
+        # self.world.canvas.coords(
+        #     sensor_left_circle,
+        #     sensor_left[0] - self.world.cellW,
+        #     sensor_left[1] - self.world.cellH,
+        #     sensor_left[0] + self.world.cellW,
+        #     sensor_left[1] + self.world.cellH)
+
+        # self.world.canvas.coords(
+        #     sensor_right_circle,
+        #     sensor_right[0] - self.world.cellW,
+        #     sensor_right[1] - self.world.cellH,
+        #     sensor_right[0] + self.world.cellW,
+        #     sensor_right[1] + self.world.cellH)
 
         pheromones = [0, 0, 0]
         for i, sensor in enumerate([sensor_fwd, sensor_left, sensor_right]):
-            grid_x, grid_y = self.world.worldToGrid(sensor + self.pos)
+            grid_x, grid_y = self.world.worldToGrid(sensor)
 
-            top_left = np.array([grid_x - 2, grid_y - 2])
-            btm_right = np.array([grid_x + 3, grid_y + 3])
+            top_left = np.array([grid_x - 1, grid_y - 1])
+            btm_right = np.array([grid_x + 2, grid_y + 2])
 
             subgrid = self.world.grid[max(0, top_left[0]):min(self.world.cellsX, btm_right[0]),
                                       max(0, top_left[1]):min(self.world.cellsX, btm_right[1]), ]

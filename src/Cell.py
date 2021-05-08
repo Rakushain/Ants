@@ -5,6 +5,7 @@ from Pheromones import Pheromones
 
 class Cell:
     def __init__(self, world, x, y):
+        self.is_wall = False
         self.world = world
         self.world_pos = np.array([x * world.cellW, y * world.cellH])
         self.canvasId = self.world.canvas.create_rectangle(
@@ -23,11 +24,10 @@ class Cell:
                 species_id,
                 pos,
                 self.world.time))
-        
-        print(int(len(self.pheromones[species_id])))
+
         self.world.canvas.itemconfig(
             self.canvasId, fill=rgbtohex([
-                int(len(self.pheromones[species_id])), 0, 0]))
+                int(255 - len(self.pheromones[species_id])), 255, 255]))
 
     def resetPheromones(self):
         self.world.canvas.itemconfig(self.canvasId, fill='white')
@@ -35,3 +35,8 @@ class Cell:
             for pheromone in species:
                 # self.world.canvas.delete(pheromone.id)
                 del pheromone
+
+    def addWall(self):
+        self.is_wall = True
+        self.world.canvas.itemconfig(
+            self.canvasId, fill="black")

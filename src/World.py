@@ -22,10 +22,11 @@ class World:
         Species(np.array([255, 255, 0]), 1, 300),
     ]
 
-    def __init__(self, canvas, width, height,
+    def __init__(self, main_gui, canvas, width, height,
                  cellsX, cellsY, maxFood, maxNests):
         self.cellW = width / cellsX
         self.cellH = height / cellsY
+        self.main_gui = main_gui
         self.canvas = canvas
         self.cellsX = cellsX
         self.cellsY = cellsY
@@ -71,7 +72,7 @@ class World:
                 self.canvas.delete(ant.view_arc)
                 self.canvas.delete(ant.ant_circle)
                 del ant
-            self.canvas.delete(nest.id)
+            self.canvas.delete(nest.canvas_id)
             del nest
 
         for food in self.food:
@@ -97,6 +98,10 @@ class World:
             return
         self.nests.append(nest)
 
+    def addWall(self, x, y):
+        grid_x, grid_y = self.worldToGrid(np.array([x, y]))
+        self.grid[grid_x][grid_y].addWall()
+
     def loadWorld(self, worldFile):
         self.reset()
         with open(f"worlds/{worldFile}") as file:
@@ -113,7 +118,7 @@ class World:
 
             for nest in world_data['nests']:
                 self.addNest(Nest(
-                    self, nest['x'], nest['y'], nest['species'], nest['size']))
+                    self, len(self.nests), nest['x'], nest['y'], nest['species'], nest['size']))
 
     def modifSpecies(self, speciesId, speed, stamina):
         species = self.species[speciesId]

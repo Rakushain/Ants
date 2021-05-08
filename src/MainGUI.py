@@ -28,14 +28,15 @@ class MainGUI:
 
         self.foodOrNest = tk.IntVar(value=FoodOrNest.FOOD)
         self.speciesId = tk.IntVar(value=0)
-        self.isModifying = tk.BooleanVar(value=False)
-        self.isModifying.trace_add('write', self.on_modif_state_change)
+        self.is_modifying = tk.BooleanVar(value=False)
+        self.is_modifying.trace_add('write', self.on_modif_state_change)
 
         self.create_frame_top()
         self.create_canvas()
         self.create_frame_bottom()
 
         self.world = World(
+            self,
             self.canvas,
             self.canvasW,
             self.canvasH,
@@ -43,6 +44,8 @@ class MainGUI:
             cellsY,
             maxFood,
             maxNests)
+            
+        self.world.loadWorld("Test.json")
 
         self.root.mainloop()
 
@@ -50,9 +53,13 @@ class MainGUI:
         self.world.reset()
         print(sys.getrefcount(self.canvas))
 
-    def handleCanvasClick(self, event):
+    def handle_canvas_click(self, event):
         print(event.x, event.y)
-        if (not self.isModifying.get()) or self.world.started:
+        if (not self.is_modifying.get()):
+            self.world.addWall(event.x, event.y)
+            return
+        
+        if self.world.started:
             return
 
         try:
@@ -65,11 +72,17 @@ class MainGUI:
 
         print(amount)
 
-        if self.foodOrNest.get() == FoodOrNest.FOOD:
+        if self.foodOrNest.get() == FoodOrNest.FOOD and len(self.world.food) < self.world.maxFood:
             self.world.addFood(Food(self.canvas, event.x, event.y, amount))
-        elif self.foodOrNest.get() == FoodOrNest.NEST:
+        elif self.foodOrNest.get() == FoodOrNest.NEST and len(self.world.nests) < self.world.maxNests:
             self.world.addNest(
-                Nest(self.world, event.x, event.y, self.speciesId.get(), amount))
+                Nest(self.world, len(self.world.nests), event.x, event.y, self.speciesId.get(), amount))
+    
+    def handle_canvas_drag(self, event):
+        if self.is_modifying.get():
+            return
+
+        self.world.addWall(event.x, event.y)
 
     def create_canvas(self):
         frame = tk.Frame(self.root)
@@ -82,7 +95,8 @@ class MainGUI:
             bg=BG_COLOR,
             highlightthickness=0)
         self.canvas.pack(expand="yes")
-        self.canvas.bind("<Button-1>", self.handleCanvasClick)
+        self.canvas.bind("<Button-1>", self.handle_canvas_click)
+        self.canvas.bind('<B1-Motion>', self.handle_canvas_drag)
 
         frame.pack(fill="both", expand="yes")
 
@@ -147,9 +161,9 @@ class MainGUI:
 
         self.modif_button = tk.Button(
             frame,
-            text='OK' if self.isModifying.get() else 'Modifier',
-            command=lambda: self.isModifying.set(
-                not self.isModifying.get()))
+            text='OK' if self.is_modifying.get() else 'Modifier',
+            command=lambda: self.is_modifying.set(
+                not self.is_modifying.get()))
         self.modif_button.grid(columnspan=2, sticky=tk.NSEW)
 
         frame.pack(side=tk.LEFT)
@@ -207,7 +221,7 @@ class MainGUI:
 
     def on_modif_state_change(self, *_):
         self.modif_button.configure(
-            text='OK' if self.isModifying.get() else 'Modifier')
+            text='OK' if self.is_modifying.get() else 'Modifier')
 
         elements = [
             *self.species_radios,
@@ -219,7 +233,7 @@ class MainGUI:
 
         for element in elements:
             element.configure(
-                state=tk.NORMAL if self.isModifying.get() else tk.DISABLED)
+                state=tk.NORMAL if self.is_modifying.get() else tk.DISABLED)
 
     def create_worlds_dropdown(self, parent):
         loadWorldOptions = []
