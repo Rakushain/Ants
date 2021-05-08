@@ -26,6 +26,8 @@ class MainGUI:
         self.canvasW = canvasW
         self.canvasH = canvasH
 
+        self.speed_value = tk.DoubleVar(value=1)
+        self.speed_value.trace_add('write', self.on_modif_speed)
         self.foodOrNest = tk.IntVar(value=FoodOrNest.FOOD)
         self.speciesId = tk.IntVar(value=0)
         self.is_modifying = tk.BooleanVar(value=False)
@@ -44,8 +46,8 @@ class MainGUI:
             cellsY,
             maxFood,
             maxNests)
-            
-        self.world.loadWorld("Test.json")
+
+        self.world.loadWorld("1 espece et 1 ressource.json")
 
         self.root.mainloop()
 
@@ -58,7 +60,7 @@ class MainGUI:
         if (not self.is_modifying.get()):
             self.world.addWall(event.x, event.y)
             return
-        
+
         if self.world.started:
             return
 
@@ -72,12 +74,13 @@ class MainGUI:
 
         print(amount)
 
-        if self.foodOrNest.get() == FoodOrNest.FOOD and len(self.world.food) < self.world.maxFood:
+        if self.foodOrNest.get() == FoodOrNest.FOOD and len(
+                self.world.food) < self.world.maxFood:
             self.world.addFood(Food(self.canvas, event.x, event.y, amount))
         elif self.foodOrNest.get() == FoodOrNest.NEST and len(self.world.nests) < self.world.maxNests:
             self.world.addNest(
                 Nest(self.world, len(self.world.nests), event.x, event.y, self.speciesId.get(), amount))
-    
+
     def handle_canvas_drag(self, event):
         if self.is_modifying.get():
             return
@@ -103,6 +106,8 @@ class MainGUI:
     def create_frame_top(self):
         frame = tk.Frame(self.root)
         frame.pack(fill="both")
+
+        self.create_size_dropdown(frame)
 
         self.create_worlds_dropdown(frame)
 
@@ -228,12 +233,16 @@ class MainGUI:
             *self.species_traits_entries,
             self.foodRadio,
             self.nestRadio,
-            self.foodOrNestAmountInput
+            self.foodOrNestAmountInput,
+            self.opt_world_size
         ]
 
         for element in elements:
             element.configure(
                 state=tk.NORMAL if self.is_modifying.get() else tk.DISABLED)
+
+    def on_modif_speed(self, *_):
+        self.world.speed_value = self.speed_value.get()
 
     def create_worlds_dropdown(self, parent):
         loadWorldOptions = []
@@ -257,6 +266,29 @@ class MainGUI:
 
         loadWorldDrop.pack(side=tk.LEFT)
 
+    def create_size_dropdown(self, parent):
+        OptionList = [
+            "20",
+            "50",
+            "75",
+            "100",
+            "150",
+            "200"
+        ]
+        self.world_size = tk.IntVar(parent)
+        self.world_size.set(OptionList[1])
+
+        self.opt_world_size = tk.OptionMenu(
+            parent, self.world_size, *OptionList)
+        self.opt_world_size.config(
+            width=15, font=(
+                "Helvetica", 12), state=tk.DISABLED)
+        self.opt_world_size.pack(side=tk.RIGHT)
+
+        label_size = tk.Label(parent, text="Taille monde:")
+        label_size.config(width=15, font=("Helvetica", 16))
+        label_size.pack(side=tk.RIGHT)
+
     def create_frame_bottom(self):
         frame = tk.Frame(self.root, bg='grey')
 
@@ -269,18 +301,68 @@ class MainGUI:
         button_start = tk.Button(
             frame,
             text="Pas ->",
-            command=lambda: self.world.next_frame())
+            command=self.step)
         button_start.pack(side=tk.LEFT)
+
+        label_speed = tk.Label(frame, text="Vitesse :")
+        label_speed.config(width=15, height=1, font=("Helvetica, 14"))
+        label_speed.pack(side=tk.LEFT)
+
+        button_speed_minus = tk.Button(
+            frame,
+            text="-",
+            height=0,
+            width=25,
+            command=self.speed_minus)
+        button_speed_minus.pack(side=tk.LEFT)
+
+        label_speed_update = tk.Label(frame, textvariable=self.speed_value)
+        label_speed_update.config(width=20)
+        label_speed_update.pack(side=tk.LEFT)
+
+        button_speed_add = tk.Button(
+            frame,
+            text="+",
+            height=0,
+            width=25,
+            command=self.speed_add)
+        button_speed_add.pack(side=tk.LEFT)
+
+        self.label_time = tk.Label(frame)
+        self.label_time.config(width=8, height=2)
+        self.label_time.pack(side=tk.LEFT)
 
         frame.pack(side="bottom", fill="both", padx=5, pady=5)
 
+    def update_time(self):
+        #  Permet de mettre le temps à jour sur le label correspondant
+        self.label_time.config(text=int(self.world.time))
+        # self.main_gui.button_go["text"] = "Go =>"
+
+    def speed_minus(self):
+        if 0.25 < self.speed_value.get() <= 2:
+            self.speed_value.set(self.speed_value.get() - 0.25)
+        else:
+            return
+
+    def speed_add(self):
+        if 0.25 <= self.speed_value.get() < 2:
+            self.speed_value.set(self.speed_value.get() + 0.25)
+        else:
+            return
+
     def start_stop(self):
-        if(self.world.started):
+        if self.world.paused or not self.world.started:
+            self.world.start()
+            self.update_time()
+            self.button_go["text"] = "Stop"
+        else:
             self.world.stop()
             self.button_go["text"] = "Go =>"
-        else:
-            self.world.start()
-            self.button_go["text"] = "Stop"
+
+    def step(self):
+        self.world.next_frame()
+        self.button_go["text"] = "Go =>"
 
     def spawn_wrong_value_popup(self, trait, min_val, max_val, value):
         """

@@ -17,11 +17,12 @@ class Nest:
         self.color = species.color
         self.inv_color = np.array([255 - val for val in self.color])
         hexColor = rgbtohex(self.color)
-        self.canvas_id = create_circle(self.world.canvas, x, y, self.size, hexColor)
+        self.canvas_id = create_circle(
+            self.world.canvas, x, y, self.size, hexColor)
 
         self.ants = [Ant(self.world, self, i, species.speed, species.stamina, hexColor)
                      for i in range(nAnts)]
-        
+
     def addFood(self, amount):
         self.food += amount
         print(f"Nid {self.nest_id}: {self.food} food")

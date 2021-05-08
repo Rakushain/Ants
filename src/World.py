@@ -32,6 +32,7 @@ class World:
         self.cellsY = cellsY
         self.maxFood = maxFood
         self.maxNests = maxNests
+        self.speed_value = 1
 
         self.grid = np.array(
             [
@@ -51,7 +52,6 @@ class World:
     def start(self):
         self.started = True
         self.paused = False
-        self.time = 0
         print("START")
         self.update()
 
@@ -62,6 +62,8 @@ class World:
     def next_frame(self):
         self.started = True
         self.paused = True
+        # self.main_gui.label_time.config(text=self.main_gui.update_time())
+        # self.main_gui.button_go["text"] = "Go =>"
         self.update()
 
     def reset(self):
@@ -104,6 +106,7 @@ class World:
 
     def loadWorld(self, worldFile):
         self.reset()
+        self.main_gui.button_go["text"] = "Go =>"
         with open(f"worlds/{worldFile}") as file:
             data = file.read()
             world_data = json.loads(data)
@@ -129,6 +132,9 @@ class World:
         if not self.started:
             return
 
+        self.time += self.speed_value
+        self.main_gui.update_time()
+
         for nest in self.nests:
             for ant in nest.ants:
                 ant.update()
@@ -136,7 +142,8 @@ class World:
         if self.paused:
             return
 
-        self.time += 1
+        # self.time += (1 * self.main_gui.speed_value.get())
+        # self.main_gui.label_time.config(text=self.main_gui.update_time())
         self.canvas.after(20, self.update)
 
     def worldToGrid(self, pos):

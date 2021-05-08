@@ -55,7 +55,7 @@ class Ant:
         self.steer_strength = 0.25
         self.wander_strength = 10
         self.speed = 4  # speed
-        self.velocity = self.direction * self.speed
+        self.velocity = self.direction * self.speed * self.world.speed_value
 
         self.base_stamina = stamina
         self.stamina = stamina
@@ -120,7 +120,7 @@ class Ant:
         self.wander()
         self.handle_food()
 
-        desired_velocity = self.direction * self.speed
+        desired_velocity = self.direction * self.speed * self.world.speed_value
 
         acceleration = (desired_velocity - self.velocity) * self.steer_strength
         acceleration_magnitude = np.linalg.norm(acceleration)
@@ -129,8 +129,9 @@ class Ant:
 
         self.velocity = self.velocity + acceleration
         velocity_magnitude = np.linalg.norm(self.velocity)
-        if velocity_magnitude > self.speed:
-            self.velocity = self.velocity / velocity_magnitude * self.speed
+        if velocity_magnitude > (self.speed * self.world.speed_value):
+            self.velocity = self.velocity / velocity_magnitude * \
+                self.speed * self.world.speed_value
 
         self.pos += self.velocity
         self.world.canvas.move(self.ant_id, self.velocity[0], self.velocity[1])
@@ -147,7 +148,7 @@ class Ant:
             random_inside_circle() *
             self.wander_strength)
 
-        self.stamina -= 1
+        self.stamina -= self.world.speed_value
 
     def handle_food(self):
         if self.has_food or self.stamina <= 0:
