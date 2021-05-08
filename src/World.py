@@ -22,10 +22,11 @@ class World:
         Species(np.array([255, 255, 0]), 1, 300),
     ]
 
-    def __init__(self, canvas, width, height,
+    def __init__(self, main_gui, canvas, width, height,
                  cellsX, cellsY, maxFood, maxNests):
         self.cellW = width / cellsX
         self.cellH = height / cellsY
+        self.main_gui = main_gui
         self.canvas = canvas
         self.cellsX = cellsX
         self.cellsY = cellsY
@@ -50,8 +51,9 @@ class World:
     def start(self):
         self.started = True
         self.paused = False
+        self.time = 0
         print("START")
-        self.updateNests()
+        self.update()
 
     def stop(self):
         self.started = False
@@ -60,16 +62,17 @@ class World:
     def next_frame(self):
         self.started = True
         self.paused = True
-        self.updateNests()
+        self.update()
 
     def reset(self):
         self.stop()
 
         for nest in self.nests:
             for ant in nest.ants:
-                self.canvas.delete(ant.id)
+                self.canvas.delete(ant.view_arc)
+                self.canvas.delete(ant.ant_circle)
                 del ant
-            self.canvas.delete(nest.id)
+            self.canvas.delete(nest.canvas_id)
             del nest
 
         for food in self.food:
@@ -95,6 +98,10 @@ class World:
             return
         self.nests.append(nest)
 
+    def addWall(self, x, y):
+        grid_x, grid_y = self.worldToGrid(np.array([x, y]))
+        self.grid[grid_x][grid_y].addWall()
+
     def loadWorld(self, worldFile):
         self.reset()
         with open(f"worlds/{worldFile}") as file:
@@ -111,67 +118,28 @@ class World:
 
             for nest in world_data['nests']:
                 self.addNest(Nest(
-                    self, nest['x'], nest['y'], nest['species'], nest['size']))
+                    self, len(self.nests), nest['x'], nest['y'], nest['species'], nest['size']))
 
     def modifSpecies(self, speciesId, speed, stamina):
         species = self.species[speciesId]
         species.speed = speed
         species.stamina = stamina
 
-    def updateNests(self):
+    def update(self):
         if not self.started:
             return
 
-        for nestId, nest in enumerate(self.nests):
+        for nest in self.nests:
             for ant in nest.ants:
-                x, y = self.worldToGrid(ant.x, ant.y)
-
-                if ant.hasFood:
-                    self.addPheromones(x, y, nestId)
-                else:
-                    for food in self.food:
-                        if sqrt((ant.x - food.x)**2 + (ant.y - food.y)
-                                ** 2) <= food.maxAmount and food.amount > 0:
-                            food.decrease(1)
-                            ant.hasFood = True
-
-                if sqrt((ant.x - nest.x)**2 +
-                        (ant.y - nest.y)**2) <= nest.size:
-                    ant.hasFood = False
-                    ant.resetStamina()
-
-                possibleDirs = []
-                dirWeights = []
-
-                for gX in range(-2, 3):
-                    for gY in range(-2, 3):
-                        a = np.array([x + gX, y + gY])
-
-                        if (a[0] < 0 or a[0] >= self.cellsX or a[1] <
-                                0 or a[1] >= self.cellsY or (gX == 0 and gY == 0)):
-                            continue
-
-                        _angle = angle(a, ant.direction)
-                        if _angle < np.pi / 2 and _angle > -np.pi / 2:
-                            possibleDirs.append(np.array([gX, gY]))
-                            dirWeights.append(
-                                self.grid[a[0], a[1]].pheromones[nestId].amount)
-
-                ant.update(self.time, possibleDirs, np.array(dirWeights))
+                ant.update()
 
         if self.paused:
             return
 
         self.time += 1
-        self.canvas.after(20, self.updateNests)
+        self.canvas.after(20, self.update)
 
-    def worldToGrid(self, x, y):
-        return int(x / self.width * self.cellsX), int(y /
-                                                      self.height * self.cellsY)
-
-    def addPheromones(self, x, y, nestId):
-        # TODO: fourmi qui sort du canvas => not implemented
-        if x < 0 or x > self.cellsX or y < 0 or y > self.cellsY:
-            return
-        # TODO: variable amount
-        self.grid[x, y].addPheromones(nestId, 0.1)  # TODO: Color
+    def worldToGrid(self, pos):
+        x, y = pos
+        return np.array([int(x / self.width * self.cellsX), int(y /
+                                                                self.height * self.cellsY)])
