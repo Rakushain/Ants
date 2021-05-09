@@ -203,26 +203,28 @@ class MainGUI:
         frame.pack(side=tk.LEFT)
 
     def validate_species_trait(self, trait, str_val):
-        trait_defaults = species_defaults[trait]
-        min_val = trait_defaults['min']
-        max_val = trait_defaults['max']
+        return True
 
-        valid = False
+        # trait_defaults = species_defaults[trait]
+        # min_val = trait_defaults['min']
+        # max_val = trait_defaults['max']
 
-        try:
-            new_val = float(str_val)
-            if new_val >= trait_defaults['min'] and new_val <= trait_defaults['max']:
-                self.world.species[self.speciesId.get()].update_trait(
-                    trait, new_val)
-                valid = True
-        except ValueError:
-            pass
+        # valid = False
 
-        if not valid:
-            self.spawn_wrong_value_popup(
-                trait, min_val, max_val, str_val)
+        # try:
+        #     new_val = float(str_val)
+        #     if new_val >= trait_defaults['min'] and new_val <= trait_defaults['max']:
+        #         self.world.species[self.speciesId.get()].update_trait(
+        #             trait, new_val)
+        #         valid = True
+        # except ValueError:
+        #     pass
 
-        return valid
+        # if not valid:
+        #     self.spawn_wrong_value_popup(
+        #         trait, min_val, max_val, str_val)
+
+        # return valid
 
     def on_modif_state_change(self, *_):
         self.modif_button.configure(
@@ -277,6 +279,7 @@ class MainGUI:
         ]
         self.world_size = tk.IntVar(parent)
         self.world_size.set(OptionList[1])
+        self.world_size.trace_add('write', self.udpate_world_size)
 
         self.opt_world_size = tk.OptionMenu(
             parent, self.world_size, *OptionList)
@@ -288,6 +291,10 @@ class MainGUI:
         label_size = tk.Label(parent, text="Taille monde:")
         label_size.config(width=15, font=("Helvetica", 16))
         label_size.pack(side=tk.RIGHT)
+    
+    def udpate_world_size(self):
+        world_size = self.world_size.get()
+        self.world.reset_grid(world_size, world_size)
 
     def create_frame_bottom(self):
         frame = tk.Frame(self.root, bg='grey')

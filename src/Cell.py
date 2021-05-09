@@ -7,6 +7,7 @@ class Cell:
     def __init__(self, world, x, y):
         self.is_wall = False
         self.world = world
+        self.pos = np.array([x, y])
         self.world_pos = np.array([x * world.cellW, y * world.cellH])
         self.canvasId = self.world.canvas.create_rectangle(
             self.world_pos[0],
@@ -29,8 +30,8 @@ class Cell:
             self.canvasId, fill=rgbtohex([
                 int(255 - len(self.pheromones[species_id])), 255, 255]))
 
-    def resetPheromones(self):
-        self.world.canvas.itemconfig(self.canvasId, fill='white')
+    def reset(self):
+        self.world.canvas.delete(self.canvasId)
         for species in self.pheromones:
             for pheromone in species:
                 # self.world.canvas.delete(pheromone.id)

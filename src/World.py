@@ -24,6 +24,8 @@ class World:
 
     def __init__(self, main_gui, canvas, width, height,
                  cellsX, cellsY, maxFood, maxNests):
+        self.width = width
+        self.height = height
         self.cellW = width / cellsX
         self.cellH = height / cellsY
         self.main_gui = main_gui
@@ -34,18 +36,7 @@ class World:
         self.maxNests = maxNests
         self.speed_value = 1
 
-        self.grid = np.array(
-            [
-                [
-                    Cell(self, x, y)
-                    for y in range(cellsX)
-                ]
-                for x in range(cellsY)
-            ]
-        )
-
-        self.width = width
-        self.height = height
+        self.grid = []
 
         self.reset()
 
@@ -81,9 +72,7 @@ class World:
             self.canvas.delete(food.id)
             del food
 
-        for x in range(self.cellsY):
-            for y in range(self.cellsX):
-                self.grid[x][y].resetPheromones()
+        self.reset_grid(self.cellsX, self.cellsY)
 
         self.nests = []
         self.food = []
@@ -127,6 +116,27 @@ class World:
         species = self.species[speciesId]
         species.speed = speed
         species.stamina = stamina
+
+    def reset_grid(self, size_x, size_y):
+        self.cellsX = size_x
+        self.cellsY = size_y
+        self.cellW = self.width / self.cellsX
+        self.cellH = self.height / self.cellsY
+
+        for row in self.grid:
+            for cell in row:
+                cell.reset()
+                del cell
+        
+        self.grid = np.array(
+            [
+                [
+                    Cell(self, x, y)
+                    for y in range(self.cellsX)
+                ]
+                for x in range(self.cellsY)
+            ]
+        )
 
     def update(self):
         if not self.started:
