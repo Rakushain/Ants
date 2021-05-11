@@ -319,8 +319,8 @@ class MainGUI:
             command=self.step)
         button_start.pack(side=tk.LEFT)
 
-        button_about = tk.Button(frame, text="A propos", command = self.about)
-        button_about.pack(side = tk.RIGHT)
+        button_about = tk.Button(frame, text="A propos", command=self.about)
+        button_about.pack(side=tk.RIGHT)
 
         button_speed_add = tk.Button(
             frame,
@@ -340,20 +340,20 @@ class MainGUI:
             height=0,
             width=25,
             command=self.speed_minus)
-        button_speed_minus.pack(side=tk.RIGHT)        
+        button_speed_minus.pack(side=tk.RIGHT)
 
         label_speed = tk.Label(frame, text="Vitesse :")
         label_speed.config(width=15, height=1, font=("Helvetica, 14"))
-        label_speed.pack(side=tk.RIGHT)        
+        label_speed.pack(side=tk.RIGHT)
 
         self.label_time = tk.Label(frame)
         self.label_time.config(width=8, height=2)
         self.label_time.pack(side=tk.RIGHT)
 
-
-        self.label_species_food = tk.Label(frame, textvariable = self.species_food)
+        self.label_species_food = tk.Label(
+            frame, textvariable=self.species_food)
         self.label_species_food.config(width=8, height=2)
-        self.label_species_food.pack(side = tk.RIGHT)
+        self.label_species_food.pack(side=tk.RIGHT)
 
         frame.pack(side="bottom", fill="both", padx=5, pady=5)
 
@@ -363,11 +363,12 @@ class MainGUI:
         # self.main_gui.button_go["text"] = "Go =>"
 
     def update_species_food(self):
-        #  Fonction utilise pour montrer la repartition de la nourriture entre especes
+        # Fonction utilise pour montrer la repartition de la nourriture entre
+        # especes
         l = [species for species in self.world.species if species.active == True]
         res = ""
         for species in l:
-            res += str(species.species_id + 1) + "-" + str(species.food) +" "
+            res += str(species.species_id + 1) + "-" + str(species.food) + " "
         self.species_food.set(res)
 
     def speed_minus(self):
@@ -427,7 +428,6 @@ class MainGUI:
 
         # win.geometry(("%dx%d%+d%+d" % (250, 50, 750, 400)))
 
-
     def about(self):
         """
         Cree un popup qui decrit les possibilites de l application
@@ -435,24 +435,24 @@ class MainGUI:
         win = tk.Toplevel()
         win.wm_title("***** A propos *****")
         liste = ["Bienvenue sur Ants Viewer !",
-            "",
-            " - Au lancement de l'application, vous pouvez charger un monde prédéfini à l'aide du",
-            "menu déroulant en haut à gauche. Vous pouvez également créer votre monde en modifiant ",
-            "le monde chargé au lancement ou en appuyant sur Nouveau Monde.",
-            "- Vous pouvez modifier la quantité de nourriture présente dans une ressource, la population",
-            "des nids, et vous pourrez également modifier les caractéristiques des fourmis de",
-            "l'espèce séléctionnée.",
-            "- Il est également possible de changer la taille de votre monde.",
-            "- Vous avez également la possibilité de poser des murs à l'aide du clic gauche de votre",
-            "souris, ce qui obligera les fourmis à trouver un chemin alternatif.",
-            "-Dans le menu en bas de la fenêtre, vous pouvez lancer la simulation ou la stopper lorsque",
-            "celle-ci a déjà été lancée. Un mode pas à pas est également disponible.",
-            "-La vitesse de la simulation peut etre modifiée, allant de x 0.25 à x 2.0"            
-        ]
+                 "",
+                 " - Au lancement de l'application, vous pouvez charger un monde prédéfini à l'aide du",
+                 "menu déroulant en haut à gauche. Vous pouvez également créer votre monde en modifiant ",
+                 "le monde chargé au lancement ou en appuyant sur Nouveau Monde.",
+                 "- Vous pouvez modifier la quantité de nourriture présente dans une ressource, la population",
+                 "des nids, et vous pourrez également modifier les caractéristiques des fourmis de",
+                 "l'espèce séléctionnée.",
+                 "- Il est également possible de changer la taille de votre monde.",
+                 "- Vous avez également la possibilité de poser des murs à l'aide du clic gauche de votre",
+                 "souris, ce qui obligera les fourmis à trouver un chemin alternatif.",
+                 "-Dans le menu en bas de la fenêtre, vous pouvez lancer la simulation ou la stopper lorsque",
+                 "celle-ci a déjà été lancée. Un mode pas à pas est également disponible.",
+                 "-La vitesse de la simulation peut etre modifiée, allant de x 0.25 à x 2.0"
+                 ]
         for i in range(len(liste)):
-            l = tk.Label(win, text = liste[i]).pack(side = tk.TOP, anchor = tk.W)
-        
-        b = tk.Button(win ,text = "Ok", command = win.destroy)
-        b.pack(side = tk.BOTTOM)
+            l = tk.Label(win, text=liste[i]).pack(side=tk.TOP, anchor=tk.W)
+
+        b = tk.Button(win, text="Ok", command=win.destroy)
+        b.pack(side=tk.BOTTOM)
 
         win.geometry(("%dx%d%+d%+d" % (500, 500, 750, 400)))

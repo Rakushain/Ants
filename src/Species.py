@@ -17,10 +17,10 @@ class Species:
     def reset(self):
         self.food = 0
         self.active = False
-    
+
     def set_active(self):
         self.active = True
-        
+
     def add_food(self, amount):
         self.food += amount
 

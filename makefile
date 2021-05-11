@@ -1,5 +1,5 @@
 make:
-	python3.9 src
+	python3 src
 
 lint:
 	autopep8 --in-place --recursive --aggressive .

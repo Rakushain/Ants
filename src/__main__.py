@@ -1,5 +1,4 @@
 from MainGUI import MainGUI
-
 CANVAS_WIDTH = 750
 CANVAS_HEIGHT = 750
 CELL_COUNT_X = 50
