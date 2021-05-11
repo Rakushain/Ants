@@ -31,7 +31,7 @@ class MainGUI:
         self.foodOrNest = tk.IntVar(value=FoodOrNest.FOOD)
         self.speciesId = tk.IntVar(value=0)
         self.is_modifying = tk.BooleanVar(value=False)
-        self.is_modifying.trace_add('write', self.on_modif_state_change)
+        # self.is_modifying.trace_add('write', self.on_modif_state_change)
 
         self.create_frame_top()
         self.create_canvas()
@@ -167,8 +167,7 @@ class MainGUI:
         self.modif_button = tk.Button(
             frame,
             text='OK' if self.is_modifying.get() else 'Modifier',
-            command=lambda: self.is_modifying.set(
-                not self.is_modifying.get()))
+            command=self.on_modif_state_change)
         self.modif_button.grid(columnspan=2, sticky=tk.NSEW)
 
         frame.pack(side=tk.LEFT)
@@ -227,6 +226,14 @@ class MainGUI:
         # return valid
 
     def on_modif_state_change(self, *_):
+        print(self.world.started, ' & ', self.is_modifying.get())
+        if self.world.started:
+            self.is_modifying.set(False)
+        else:
+            self.is_modifying.set(
+                not self.is_modifying.get())
+        print(self.world.started, ' & ', self.is_modifying.get(), '\n')
+
         self.modif_button.configure(
             text='OK' if self.is_modifying.get() else 'Modifier')
 
@@ -291,8 +298,8 @@ class MainGUI:
         label_size = tk.Label(parent, text="Taille monde:")
         label_size.config(width=15, font=("Helvetica", 16))
         label_size.pack(side=tk.RIGHT)
-    
-    def udpate_world_size(self):
+
+    def udpate_world_size(self, *_):
         world_size = self.world_size.get()
         self.world.reset_grid(world_size, world_size)
 
@@ -360,11 +367,12 @@ class MainGUI:
 
     def start_stop(self):
         if self.world.paused or not self.world.started:
+            self.is_modifying.set(False)
             self.world.start()
             self.update_time()
             self.button_go["text"] = "Stop"
         else:
-            self.world.stop()
+            self.world.pause()
             self.button_go["text"] = "Go =>"
 
     def step(self):

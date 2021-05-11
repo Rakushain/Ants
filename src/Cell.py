@@ -31,7 +31,7 @@ class Cell:
                 int(255 - len(self.pheromones[species_id])), 255, 255]))
 
     def reset(self):
-        self.world.canvas.delete(self.canvasId)
+        self.world.canvas.itemconfig(self.canvasId, fill="white")
         for species in self.pheromones:
             for pheromone in species:
                 # self.world.canvas.delete(pheromone.id)

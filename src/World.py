@@ -36,7 +36,15 @@ class World:
         self.maxNests = maxNests
         self.speed_value = 1
 
-        self.grid = []
+        self.grid = np.array(
+            [
+                [
+                    Cell(self, x, y)
+                    for y in range(self.cellsX)
+                ]
+                for x in range(self.cellsY)
+            ]
+        )
 
         self.reset()
 
@@ -49,12 +57,14 @@ class World:
     def stop(self):
         self.started = False
         self.paused = True
+        
+    def pause(self):
+        self.started = True
+        self.paused = True
 
     def next_frame(self):
         self.started = True
         self.paused = True
-        # self.main_gui.label_time.config(text=self.main_gui.update_time())
-        # self.main_gui.button_go["text"] = "Go =>"
         self.update()
 
     def reset(self):
@@ -126,17 +136,8 @@ class World:
         for row in self.grid:
             for cell in row:
                 cell.reset()
-                del cell
-        
-        self.grid = np.array(
-            [
-                [
-                    Cell(self, x, y)
-                    for y in range(self.cellsX)
-                ]
-                for x in range(self.cellsY)
-            ]
-        )
+
+        # print(self.grid)
 
     def update(self):
         if not self.started:
