@@ -7,11 +7,11 @@ species_defaults = {
 
 
 class Species:
-    def __init__(self, color, speed, stamina):
+    def __init__(self, species_id, color, speed, stamina):
+        self.species_id = species_id
         self.color = color
         self.speed = speed
         self.stamina = stamina
-        
         self.reset()
 
     def reset(self):

@@ -13,11 +13,5 @@
 			"size": 20,
 			"species": 0
 		}
-	],
-	"species": [
-		{
-			"speed": 1,
-			"stamina": 350
-		}
 	]
 }
