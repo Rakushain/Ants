@@ -57,7 +57,7 @@ class World:
     def stop(self):
         self.started = False
         self.paused = True
-        
+
     def pause(self):
         self.started = True
         self.paused = True

@@ -28,7 +28,7 @@ class Cell:
 
         self.world.canvas.itemconfig(
             self.canvasId, fill=rgbtohex([
-                int(255 - len(self.pheromones[species_id])), 255, 255]))
+                int(255 - 10 * len(self.pheromones[species_id])), 255, 255]))
 
     def reset(self):
         self.world.canvas.itemconfig(self.canvasId, fill="white")
