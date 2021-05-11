@@ -11,6 +11,18 @@ class Species:
         self.color = color
         self.speed = speed
         self.stamina = stamina
+        
+        self.reset()
+
+    def reset(self):
+        self.food = 0
+        self.active = False
+    
+    def set_active(self):
+        self.active = True
+        
+    def add_food(self, amount):
+        self.food += amount
 
     def update_trait(self, trait, value):
         print(trait, value)

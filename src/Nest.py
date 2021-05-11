@@ -13,6 +13,7 @@ class Nest:
         self.food = 0
 
         species = self.world.species[species_id]
+        species.set_active()
 
         self.color = species.color
         self.inv_color = np.array([255 - val for val in self.color])
@@ -25,4 +26,5 @@ class Nest:
 
     def addFood(self, amount):
         self.food += amount
+        self.world.species[self.species_id].add_food(amount)
         print(f"Nid {self.nest_id}: {self.food} food")
