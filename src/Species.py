@@ -12,10 +12,6 @@ class Species:
         self.color = color
         self.speed = speed
         self.stamina = stamina
-<<<<<<< HEAD
-
-=======
->>>>>>> 7e8c6acbb430ae827e0fa5db8bd68f8b1bc39ad4
         self.reset()
 
     def reset(self):
