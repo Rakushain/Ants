@@ -81,7 +81,7 @@ class World:
         for food in self.food:
             self.canvas.delete(food.id)
             del food
-            
+
         for species in self.species:
             species.reset()
 

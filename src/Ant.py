@@ -26,6 +26,7 @@ class Ant:
     view_angle = 120
     # TODO: cringe
     food_disposal_distance = 4
+    wander_chance = 0.1
 
     def __init__(self, world, nest, ant_id, speed, stamina, color):
         """
@@ -63,7 +64,7 @@ class Ant:
 
         self.ant_id = f"ANT_{nest.nest_id}_{ant_id}"
 
-        self.sensors = [
+        self.sensor_circles = [
             create_circle(
                 self.world.canvas,
                 -10,
@@ -117,7 +118,7 @@ class Ant:
 
         self.sense_pheromones()
 
-        self.wander()
+        # self.wander()
         self.handle_food()
 
         desired_velocity = self.direction * self.speed * self.world.speed_value
@@ -132,6 +133,15 @@ class Ant:
         if velocity_magnitude > (self.speed * self.world.speed_value):
             self.velocity = self.velocity / velocity_magnitude * \
                 self.speed * self.world.speed_value
+
+        new_pos = self.pos + self.velocity
+        if new_pos[0] < 0 or new_pos[0] > self.world.width:
+            self.velocity[0] = 0
+            self.direction[0] = 0
+
+        if new_pos[1] < 0 or new_pos[1] > self.world.height:
+            self.velocity[1] = 0
+            self.direction[1] = 0
 
         self.pos += self.velocity
         self.world.canvas.move(self.ant_id, self.velocity[0], self.velocity[1])
@@ -175,7 +185,7 @@ class Ant:
             food_dir = (self.food_target.pos - self.pos)
             dist = np.linalg.norm(self.direction)
 
-            if dist < max(self.food_target.scale, 4):
+            if dist < max(self.food_target.scale, 20):
                 self.has_food = True
                 self.food_target.decrease()
                 self.food_amount += 1
@@ -209,41 +219,44 @@ class Ant:
             )
 
     def sense_pheromones(self):
-        sensor_fwd = self.view_distance * \
-            self.velocity / np.linalg.norm(self.velocity)
+        sensor_fwd = self.view_distance * self.velocity / np.linalg.norm(self.velocity)
         sensor_left = rotate(sensor_fwd,
-                             np.deg2rad(-self.view_angle / 2)) + self.pos
+                             np.deg2rad(self.view_angle / 2))
         sensor_right = rotate(
             sensor_fwd, np.deg2rad(
-                self.view_angle / 2)) + self.pos
-        sensor_fwd += self.pos
+                -self.view_angle / 2))
+
+        self.sensors = [sensor_fwd, sensor_left, sensor_right]
 
         #TODO: cringe
-        # sensor_fwd_circle, sensor_left_circle, sensor_right_circle = self.sensors
-        # self.world.canvas.coords(
-        #     sensor_fwd_circle,
-        #     sensor_fwd[0] - self.world.cellW,
-        #     sensor_fwd[1] - self.world.cellH,
-        #     sensor_fwd[0] + self.world.cellW,
-        #     sensor_fwd[1] + self.world.cellH)
+        sensor_fwd_circle, sensor_left_circle, sensor_right_circle = self.sensor_circles
+        self.world.canvas.coords(
+            sensor_fwd_circle,
+            sensor_fwd[0] - self.world.cellW + self.pos[0],
+            sensor_fwd[1] - self.world.cellH + self.pos[1],
+            sensor_fwd[0] + self.world.cellW + self.pos[0],
+            sensor_fwd[1] + self.world.cellH + self.pos[1])
 
-        # self.world.canvas.coords(
-        #     sensor_left_circle,
-        #     sensor_left[0] - self.world.cellW,
-        #     sensor_left[1] - self.world.cellH,
-        #     sensor_left[0] + self.world.cellW,
-        #     sensor_left[1] + self.world.cellH)
+        self.world.canvas.coords(
+            sensor_left_circle,
+            sensor_left[0] - self.world.cellW + self.pos[0],
+            sensor_left[1] - self.world.cellH + self.pos[1],
+            sensor_left[0] + self.world.cellW + self.pos[0],
+            sensor_left[1] + self.world.cellH + self.pos[1])
 
-        # self.world.canvas.coords(
-        #     sensor_right_circle,
-        #     sensor_right[0] - self.world.cellW,
-        #     sensor_right[1] - self.world.cellH,
-        #     sensor_right[0] + self.world.cellW,
-        #     sensor_right[1] + self.world.cellH)
+        self.world.canvas.coords(
+            sensor_right_circle,
+            sensor_right[0] - self.world.cellW + self.pos[0],
+            sensor_right[1] - self.world.cellH + self.pos[1],
+            sensor_right[0] + self.world.cellW + self.pos[0],
+            sensor_right[1] + self.world.cellH + self.pos[1])
 
-        pheromones = [0, 0, 0]
-        for i, sensor in enumerate([sensor_fwd, sensor_left, sensor_right]):
-            grid_x, grid_y = self.world.worldToGrid(sensor)
+        for sensor in self.sensor_circles:
+            self.world.canvas.itemconfig(sensor, fill='blue')
+
+        pheromones = [0, 0, 0, self.wander_chance]
+        for i, sensor in enumerate(self.sensors):
+            grid_x, grid_y = self.world.worldToGrid(sensor + self.pos)
 
             top_left = np.array([grid_x - 1, grid_y - 1])
             btm_right = np.array([grid_x + 2, grid_y + 2])
@@ -253,22 +266,34 @@ class Ant:
 
             for row in subgrid:
                 for cell in row:
-                    for pheromone in cell.pheromones[self.species_id]:
-                        lifetime = self.world.time - pheromone.creation_time
-                        evaporation = max(1, lifetime / 1000)
-                        pheromones[i] += 1 - evaporation
+                    pheromones[i] = cell.get_pheromones(self.species_id)
 
-        if np.sum(pheromones) == 0:
+        sum_pheromones = np.sum(pheromones)
+        if sum_pheromones == 0:
             return
 
-        value_fwd, value_left, value_right = pheromones
+        choice = np.random.choice([0, 1, 2, 4], p=pheromones / sum_pheromones)
 
-        if value_fwd > max(value_left, value_right):
-            self.direction = sensor_fwd
-        elif value_left > value_right:
-            self.direction = sensor_left
-        else:
-            self.direction = sensor_right
+        if choice == 4:
+            self.wander()
+            return
+
+        self.direction = self.sensor_circles[choice]
+        self.world.canvas.itemconfig(
+            self.sensor_circles[choice], fill='yellow')
+
+        # if value_fwd > max(value_left, value_right):
+        #     self.direction = sensor_fwd
+        #     # TODO: cringe
+        #     self.world.canvas.itemconfig(sensor_fwd_circle, fill='yellow')
+        # elif value_left > value_right:
+        #     self.direction = sensor_left
+        #     # TODO: cringe
+        #     self.world.canvas.itemconfig(sensor_left_circle, fill='yellow')
+        # else:
+        #     self.direction = sensor_right
+        #     # TODO: cringe
+        #     self.world.canvas.itemconfig(sensor_right_circle, fill='yellow')
 
     def resetStamina(self):
         """

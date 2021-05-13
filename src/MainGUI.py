@@ -274,6 +274,7 @@ class MainGUI:
             command=lambda filename: self.world.loadWorld(f"{filename}.json") if filename != 'Nouveau Monde' else self.world.reset())
 
         loadWorldDrop.pack(side=tk.LEFT)
+        # TODO: Load world -> change default values
 
     def create_size_dropdown(self, parent):
         OptionList = [
