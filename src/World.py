@@ -16,10 +16,10 @@ class World:
     time = 0
 
     species = [
-        Species(np.array([255, 0, 0]), 1, 300),
-        Species(np.array([0, 255, 0]), 1, 300),
-        Species(np.array([0, 0, 255]), 1, 300),
-        Species(np.array([255, 255, 0]), 1, 300),
+        Species(0, np.array([255, 0, 0]), 1, 300),
+        Species(1, np.array([0, 255, 0]), 1, 300),
+        Species(2, np.array([0, 0, 255]), 1, 300),
+        Species(3, np.array([255, 255, 0]), 1, 300),
     ]
 
     def __init__(self, main_gui, canvas, width, height,
@@ -155,7 +155,7 @@ class World:
 
         if self.paused:
             return
-
+        self.main_gui.update_species_food()
         # self.time += (1 * self.main_gui.speed_value.get())
         # self.main_gui.label_time.config(text=self.main_gui.update_time())
         self.canvas.after(20, self.update)
