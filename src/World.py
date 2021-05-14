@@ -105,7 +105,6 @@ class World:
     def addWall(self, x, y):
         grid_x, grid_y = self.worldToGrid(np.array([x, y]))
         self.grid[grid_x][grid_y].addWall()
-        print(grid_x)
 
     def loadWorld(self, worldFile):
         self.reset()

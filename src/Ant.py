@@ -115,7 +115,7 @@ class Ant:
 
         self.sense_pheromones()
 
-        self.wander()
+        # self.wander()
         self.handle_food()
 
         desired_velocity = self.direction * self.speed * self.world.speed_value
@@ -131,6 +131,15 @@ class Ant:
             self.velocity = self.velocity / velocity_magnitude * \
                 self.speed * self.world.speed_value
             
+        new_pos = self.pos + self.velocity
+        if new_pos[0] < 0 or new_pos[0] > self.world.width:
+            self.velocity[0] = 0
+            self.direction[0] = 0
+
+        if new_pos[1] < 0 or new_pos[1] > self.world.height:
+            self.velocity[1] = 0
+            self.direction[1] = 0
+
         new_pos = self.pos + self.velocity
         if new_pos[0] < 0 or new_pos[0] > self.world.width:
             self.velocity[0] = 0
