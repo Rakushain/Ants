@@ -23,6 +23,7 @@ class Cell:
         for pheromone in self.pheromones[species_id][:]:
             lifetime = self.world.time - pheromone.creation_time
             evaporation = lifetime / 1000
+            # par defaut, les pheromones disparaissent apres 1000 frames
 
             if evaporation > 1:
                 self.pheromones[species_id].remove(pheromone)

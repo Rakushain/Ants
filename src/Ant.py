@@ -5,7 +5,6 @@ from util import create_circle, vectRot, random_inside_circle, distance, rotate
 class Ant:
     """
     Classe représentant une Fourmi
-
     Attributes:
         canvas:         Référence au canvas.
         id:             Identifiant de la fourmi sur le canvas.
@@ -25,20 +24,20 @@ class Ant:
     view_distance = 40
     view_angle = 120
     # TODO: cringe
+    # distance par rapport au centre du nid pour déposer la nourriture
     food_disposal_distance = 4
+    # Chance que la fourmi parte dans une direction aléatoire
     wander_chance = 0.1
 
     def __init__(self, world, nest, ant_id, speed, stamina, color):
         """
             Initialisation de la Fourmi.
-
             Args:
                 canvas:     Référence au canvas.
                 nestX:      Position du nid en X.
                 nestY:      Position du nid en Y.
                 stamina:    Endurance max de la fourmi.
                 color:      Couleur de la fourmi.
-
             Returns:
                 Une nouvelle instance de Fourmi.
         """
@@ -53,9 +52,9 @@ class Ant:
 
         self.direction = random_inside_circle()
 
-        self.steer_strength = 0.25
-        self.wander_strength = 10
-        self.speed = 4  # speed
+        self.steer_strength = 0.25 #virage serre
+        self.wander_strength = 10 #definit la déviation de la trajectoire actuelle
+        self.speed = speed  # speed
         self.velocity = self.direction * self.speed * self.world.speed_value
 
         self.base_stamina = stamina
@@ -96,12 +95,10 @@ class Ant:
     def update(self):
         """
             Mise a jour de la Fourmi.
-
             Args:
                 time:           Temps actuelle de la simulation.
                 possibleDirs:   Directions que la fourmi peut prendre.
                 dirWeights:     Poids de chaque direction (poids plus élevé -> fourmi a plus de chance d'aller dans cette direction).
-
             Returns:
                 None
         """
@@ -113,7 +110,7 @@ class Ant:
                 # TODO: variable amount
                 self.world.grid[grid_x, grid_y].addPheromones(
                     self.species_id, self.pos)  # TODO: Color
-
+    
         self.check_nest()
 
         self.sense_pheromones()
@@ -133,6 +130,15 @@ class Ant:
         if velocity_magnitude > (self.speed * self.world.speed_value):
             self.velocity = self.velocity / velocity_magnitude * \
                 self.speed * self.world.speed_value
+            
+        new_pos = self.pos + self.velocity
+        if new_pos[0] < 0 or new_pos[0] > self.world.width:
+            self.velocity[0] = 0
+            self.direction[0] = 0
+
+        if new_pos[1] < 0 or new_pos[1] > self.world.height:
+            self.velocity[1] = 0
+            self.direction[1] = 0
 
         new_pos = self.pos + self.velocity
         if new_pos[0] < 0 or new_pos[0] > self.world.width:
