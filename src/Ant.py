@@ -52,8 +52,8 @@ class Ant:
 
         self.direction = random_inside_circle()
 
-        self.steer_strength = 0.25 #virage serre
-        self.wander_strength = 10 #definit la déviation de la trajectoire actuelle
+        self.steer_strength = 0.25  # virage serre
+        self.wander_strength = 10  # definit la déviation de la trajectoire actuelle
         self.speed = speed  # speed
         self.velocity = self.direction * self.speed * self.world.speed_value
 
@@ -110,7 +110,7 @@ class Ant:
                 # TODO: variable amount
                 self.world.grid[grid_x, grid_y].addPheromones(
                     self.species_id, self.pos)  # TODO: Color
-    
+
         self.check_nest()
 
         self.sense_pheromones()
@@ -130,7 +130,7 @@ class Ant:
         if velocity_magnitude > (self.speed * self.world.speed_value):
             self.velocity = self.velocity / velocity_magnitude * \
                 self.speed * self.world.speed_value
-            
+
         new_pos = self.pos + self.velocity
         if new_pos[0] < 0 or new_pos[0] > self.world.width:
             self.velocity[0] = 0
@@ -225,7 +225,8 @@ class Ant:
             )
 
     def sense_pheromones(self):
-        sensor_fwd = self.view_distance * self.velocity / np.linalg.norm(self.velocity)
+        sensor_fwd = self.view_distance * \
+            self.velocity / np.linalg.norm(self.velocity)
         sensor_left = rotate(sensor_fwd,
                              np.deg2rad(self.view_angle / 2))
         sensor_right = rotate(

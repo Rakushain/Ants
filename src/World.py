@@ -113,7 +113,7 @@ class World:
         with open(f"worlds/{worldFile}") as file:
             data = file.read()
             world_data = json.loads(data)
-            try:                
+            try:
                 for food in world_data['food']:
                     self.addFood(
                         Food(
@@ -127,23 +127,26 @@ class World:
                         self, len(self.nests), nest['x'], nest['y'], nest['species'], nest['size']))
                 for wall in world_data["wall"]:
                     self.addWall(wall['x'], wall['y'])
-            except:
+            except BaseException:
                 pass
-        self.save_world()
-    
-    def write_to_json(self, path, fileName, data):
+
+    def write_to_json(self, path, data):
         json.dump(data, path)
 
     def save_world(self):
         self.stop()
         data = {}
-        data["nests"] = [{'x' : nest.pos[0], 'y' : nest.pos[1], 'size' : nest.size, "species" : nest.species_id} for nest in self.nests]
+        data["nests"] = [{'x': int(nest.pos[0]), 'y': int(
+            nest.pos[1]), 'size': nest.size, "species": nest.species_id} for nest in self.nests]
+        data["food"] = [{'x': int(food.pos[0]), 'y': int(
+            food.pos[1]), 'size': food.max_amount} for food in self.food]
+        #TODO : Mur
         files = [('JSON File', '*.json')]
-        fileName='IOTEDU'
-        filepos = asksaveasfile(filetypes = files, defaultextension = json, initialfile='IOTEDU')
-        self.write_to_json(filepos, fileName, data)
-
-
+        filepos = asksaveasfile(filetypes=files, defaultextension=".json")
+        if filepos is not None:
+            self.write_to_json(filepos, data)
+        else:
+            return
 
     def modifSpecies(self, speciesId, speed, stamina):
         species = self.species[speciesId]
