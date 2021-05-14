@@ -64,23 +64,24 @@ class MainGUI:
 
         if self.world.started:
             return
-
         try:
             amount = int(self.foodOrNestAmountInput.get())
         except ValueError:
+            self.spawn_wrong_value_popup("notint", 0, 0, 0)
             return
-
-        if amount <= 0:
-            return
-
-        print(amount)
-
+        
         if self.foodOrNest.get() == FoodOrNest.FOOD and len(
                 self.world.food) < self.world.maxFood:
-            self.world.addFood(Food(self.canvas, event.x, event.y, amount))
+            if 0 < amount <= 30:
+                self.world.addFood(Food(self.canvas, event.x, event.y, amount))
+            else:
+                self.spawn_wrong_value_popup("nourriture", 1, 30, amount)
         elif self.foodOrNest.get() == FoodOrNest.NEST and len(self.world.nests) < self.world.maxNests:
-            self.world.addNest(
-                Nest(self.world, len(self.world.nests), event.x, event.y, self.speciesId.get(), amount))
+            if 0 < amount <= 100:
+                self.world.addNest(
+                    Nest(self.world, len(self.world.nests), event.x, event.y, self.speciesId.get(), amount))
+            else:
+                self.spawn_wrong_value_popup("population de nid", 1, 100, amount)
 
     def handle_canvas_drag(self, event):
         if self.is_modifying.get():
@@ -275,6 +276,7 @@ class MainGUI:
             command=lambda filename: self.world.loadWorld(f"{filename}.json") if filename != 'Nouveau Monde' else self.world.reset())
 
         loadWorldDrop.pack(side=tk.LEFT)
+        # TODO: Load world -> change default values
 
     def create_size_dropdown(self, parent):
         OptionList = [
@@ -319,8 +321,8 @@ class MainGUI:
             command=self.step)
         button_start.pack(side=tk.LEFT)
 
-        button_about = tk.Button(frame, text="A propos", command=self.about)
-        button_about.pack(side=tk.RIGHT)
+        button_about = tk.Button(frame, text="A propos", command = self.about)
+        button_about.pack(side = tk.RIGHT)
 
         button_speed_add = tk.Button(
             frame,
@@ -340,35 +342,33 @@ class MainGUI:
             height=0,
             width=25,
             command=self.speed_minus)
-        button_speed_minus.pack(side=tk.RIGHT)
+        button_speed_minus.pack(side=tk.RIGHT)        
 
         label_speed = tk.Label(frame, text="Vitesse :")
         label_speed.config(width=15, height=1, font=("Helvetica, 14"))
-        label_speed.pack(side=tk.RIGHT)
+        label_speed.pack(side=tk.RIGHT)        
 
         self.label_time = tk.Label(frame)
         self.label_time.config(width=8, height=2)
         self.label_time.pack(side=tk.RIGHT)
 
-        self.label_species_food = tk.Label(
-            frame, textvariable=self.species_food)
+
+        self.label_species_food = tk.Label(frame, textvariable = self.species_food)
         self.label_species_food.config(width=8, height=2)
-        self.label_species_food.pack(side=tk.RIGHT)
+        self.label_species_food.pack(side = tk.RIGHT)
 
         frame.pack(side="bottom", fill="both", padx=5, pady=5)
 
     def update_time(self):
         #  Permet de mettre le temps à jour sur le label correspondant
         self.label_time.config(text=int(self.world.time))
-        # self.main_gui.button_go["text"] = "Go =>"
 
     def update_species_food(self):
-        # Fonction utilise pour montrer la repartition de la nourriture entre
-        # especes
+        #  Fonction utilise pour montrer la repartition de la nourriture entre especes
         l = [species for species in self.world.species if species.active == True]
         res = ""
         for species in l:
-            res += str(species.species_id + 1) + "-" + str(species.food) + " "
+            res += str(species.species_id + 1) + "-" + str(species.food) +" "
         self.species_food.set(res)
 
     def speed_minus(self):
@@ -399,34 +399,42 @@ class MainGUI:
         self.button_go["text"] = "Go =>"
 
     def spawn_wrong_value_popup(self, trait, min_val, max_val, value):
-        """
-        Cree un popup quand la taille d une ressource n est pas comprise entre 1 et 30
-        """
-        print('xd', self.wrong_value_popup_open)
-        if self.wrong_value_popup_open:
-            return
+            """
+            Cree un popup quand la taille d une ressource n est pas comprise entre sa valeur minimale et maximale
+            """
+            print('xd', self.wrong_value_popup_open)
+            if self.wrong_value_popup_open:
+                return
 
-        self.wrong_value_popup_open = True
+            self.wrong_value_popup_open = True
 
-        win = tk.Toplevel()
-        win.wm_title("Attention !")
+            win = tk.Toplevel()
+            win.wm_title("Attention !")
 
-        def close_win():
-            win.destroy()
-            self.wrong_value_popup_open = False
+            def close_win():
+                win.destroy()
+                self.wrong_value_popup_open = False
 
-        l = tk.Label(
-            win, text=f"Veuillez choisir une {trait} comprise entre {min_val} et {max_val}")
-        l.grid(column=0, row=0)
+            if trait == "notint":
+                l = tk.Label(
+                win, text=f"Veuillez choisir une valeur entière")
+                l.grid(column=0, row=0)
+                b = tk.Button(win, text="Ok", command=close_win)
+                b.grid(column=0, row=1)
+                return
+            
+            l = tk.Label(
+                win, text=f"Veuillez choisir une {trait} comprise entre {min_val} et {max_val}")
+            l.grid(column=0, row=0)
 
-        l = tk.Label(
-            win, text=f"valeur entrée: {value}")
-        l.grid(column=0, row=1)
+            l = tk.Label(
+                win, text=f"valeur entrée: {value}")
+            l.grid(column=0, row=1)
 
-        b = tk.Button(win, text="Ok", command=close_win)
-        b.grid(column=0, row=2)
+            b = tk.Button(win, text="Ok", command=close_win)
+            b.grid(column=0, row=2)
 
-        # win.geometry(("%dx%d%+d%+d" % (250, 50, 750, 400)))
+            # win.geometry(("%dx%d%+d%+d" % (250, 50, 750, 400)))
 
     def about(self):
         """
@@ -435,20 +443,21 @@ class MainGUI:
         win = tk.Toplevel()
         win.wm_title("***** A propos *****")
         liste = ["Bienvenue sur Ants Viewer !",
-                 "",
-                 " - Au lancement de l'application, vous pouvez charger un monde prédéfini à l'aide du",
-                 "menu déroulant en haut à gauche. Vous pouvez également créer votre monde en modifiant ",
-                 "le monde chargé au lancement ou en appuyant sur Nouveau Monde.",
-                 "- Vous pouvez modifier la quantité de nourriture présente dans une ressource, la population",
-                 "des nids, et vous pourrez également modifier les caractéristiques des fourmis de",
-                 "l'espèce séléctionnée.",
-                 "- Il est également possible de changer la taille de votre monde.",
-                 "- Vous avez également la possibilité de poser des murs à l'aide du clic gauche de votre",
-                 "souris, ce qui obligera les fourmis à trouver un chemin alternatif.",
-                 "-Dans le menu en bas de la fenêtre, vous pouvez lancer la simulation ou la stopper lorsque",
-                 "celle-ci a déjà été lancée. Un mode pas à pas est également disponible.",
-                 "-La vitesse de la simulation peut etre modifiée, allant de x 0.25 à x 2.0"
-                 ]
+                "",
+                " - Au lancement de l'application, vous pouvez charger un monde prédéfini à l'aide du",
+                "menu déroulant en haut à gauche. Vous pouvez également créer votre monde en modifiant ",
+                "le monde chargé au lancement ou en appuyant sur Nouveau Monde.",
+                "- Vous pouvez modifier la quantité de nourriture présente dans une ressource, la population",
+                "des nids, et vous pourrez également modifier les caractéristiques des fourmis de",
+                "l'espèce séléctionnée.",
+                "- Cependant, le nombre maximum de nids et de ressources est limité à 4",
+                "- Il est également possible de changer la taille de votre monde.",
+                "- Vous avez également la possibilité de poser des murs à l'aide du clic gauche de votre",
+                "souris, ce qui obligera les fourmis à trouver un chemin alternatif.",
+                "-Dans le menu en bas de la fenêtre, vous pouvez lancer la simulation ou la stopper lorsque",
+                "celle-ci a déjà été lancée. Un mode pas à pas est également disponible.",
+                "-La vitesse de la simulation peut etre modifiée, allant de x 0.25 à x 2.0"
+                ]
         for i in range(len(liste)):
             l = tk.Label(win, text=liste[i]).pack(side=tk.TOP, anchor=tk.W)
 

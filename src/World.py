@@ -16,10 +16,10 @@ class World:
     time = 0
 
     species = [
-        Species(0, np.array([255, 0, 0]), 1, 300),
-        Species(1, np.array([0, 255, 0]), 1, 300),
-        Species(2, np.array([0, 0, 255]), 1, 300),
-        Species(3, np.array([255, 255, 0]), 1, 300),
+        Species(0, np.array([255, 0, 0]), 4, 350),
+        Species(1, np.array([0, 255, 0]), 4, 350),
+        Species(2, np.array([0, 0, 255]), 4, 350),
+        Species(3, np.array([255, 255, 0]), 4, 350),
     ]
 
     def __init__(self, main_gui, canvas, width, height,
@@ -105,6 +105,7 @@ class World:
     def addWall(self, x, y):
         grid_x, grid_y = self.worldToGrid(np.array([x, y]))
         self.grid[grid_x][grid_y].addWall()
+        print(grid_x)
 
     def loadWorld(self, worldFile):
         self.reset()
