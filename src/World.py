@@ -1,4 +1,5 @@
 import numpy as np
+from tkinter.filedialog import asksaveasfile
 from Food import Food
 from Nest import Nest
 from Cell import Cell
@@ -112,18 +113,37 @@ class World:
         with open(f"worlds/{worldFile}") as file:
             data = file.read()
             world_data = json.loads(data)
+            try:                
+                for food in world_data['food']:
+                    self.addFood(
+                        Food(
+                            self.canvas,
+                            food['x'],
+                            food['y'],
+                            food['size']))
 
-            for food in world_data['food']:
-                self.addFood(
-                    Food(
-                        self.canvas,
-                        food['x'],
-                        food['y'],
-                        food['size']))
+                for nest in world_data['nests']:
+                    self.addNest(Nest(
+                        self, len(self.nests), nest['x'], nest['y'], nest['species'], nest['size']))
+                for wall in world_data["wall"]:
+                    self.addWall(wall['x'], wall['y'])
+            except:
+                pass
+        self.save_world()
+    
+    def write_to_json(self, path, fileName, data):
+        json.dump(data, path)
 
-            for nest in world_data['nests']:
-                self.addNest(Nest(
-                    self, len(self.nests), nest['x'], nest['y'], nest['species'], nest['size']))
+    def save_world(self):
+        self.stop()
+        data = {}
+        data["nests"] = [{'x' : nest.pos[0], 'y' : nest.pos[1], 'size' : nest.size, "species" : nest.species_id} for nest in self.nests]
+        files = [('JSON File', '*.json')]
+        fileName='IOTEDU'
+        filepos = asksaveasfile(filetypes = files, defaultextension = json, initialfile='IOTEDU')
+        self.write_to_json(filepos, fileName, data)
+
+
 
     def modifSpecies(self, speciesId, speed, stamina):
         species = self.species[speciesId]

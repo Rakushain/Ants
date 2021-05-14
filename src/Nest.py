@@ -8,7 +8,8 @@ class Nest:
         self.world = world
         self.pos = np.array([x, y])
         self.species_id = species_id
-        self.size = nAnts / 2
+        self.scale = nAnts / 2
+        self.size = nAnts
         self.nest_id = nest_id
         self.food = 0
 
@@ -19,7 +20,7 @@ class Nest:
         self.inv_color = np.array([255 - val for val in self.color])
         hexColor = rgbtohex(self.color)
         self.canvas_id = create_circle(
-            self.world.canvas, x, y, self.size, hexColor)
+            self.world.canvas, x, y, self.scale, hexColor)
 
         self.ants = [Ant(self.world, self, i, species.speed, species.stamina, hexColor)
                      for i in range(nAnts)]
