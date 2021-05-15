@@ -121,6 +121,8 @@ class MainGUI:
 
         self.create_species_traits(frame)
 
+        self.create_sun_check(frame)
+
         self.create_size_dropdown(frame)
 
         frame.pack(fill="both", padx=5, pady=5)
@@ -252,7 +254,8 @@ class MainGUI:
             self.foodRadio,
             self.nestRadio,
             self.foodOrNestAmountInput,
-            self.opt_world_size
+            self.opt_world_size,
+            self.sun_check
         ]
 
         for element in elements:
@@ -306,15 +309,23 @@ class MainGUI:
 
         label_size = tk.Label(parent, text="Taille monde:")
         label_size.config(width=15, font=("Helvetica", 16))
-        label_size.pack(side=tk.LEFT)
+        label_size.pack(side=tk.LEFT, anchor = tk.NW)
 
         self.opt_world_size = tk.OptionMenu(
             parent, self.world_size, *OptionList)
         self.opt_world_size.config(
             width=15, font=(
                 "Helvetica", 12), state=tk.DISABLED)
-        self.opt_world_size.pack(side=tk.LEFT)
+        self.opt_world_size.pack(side=tk.LEFT, anchor = tk.NW)
 
+    def create_sun_check(self, parent):
+        frame = tk.Frame(parent)
+        self.sun_check = tk.Checkbutton(frame)
+        self.sun_check.config(text = "Mode Soleil", width=15, font=(
+                "Helvetica", 12), state = tk.DISABLED)
+        self.sun_check.pack(side = tk.LEFT)
+        frame.pack(side = tk.BOTTOM, anchor = tk.SW)
+    
     def udpate_world_size(self, *_):
         world_size = self.world_size.get()
         self.world.reset_grid(world_size, world_size)
