@@ -12,6 +12,7 @@ import json
 class World:
     nests = []
     food = []
+    wall = []
     started = False
     paused = True
     time = 0
@@ -90,6 +91,7 @@ class World:
 
         self.nests = []
         self.food = []
+        self.wall = []
 
         self.time = 0
 
@@ -106,6 +108,7 @@ class World:
     def addWall(self, x, y):
         grid_x, grid_y = self.worldToGrid(np.array([x, y]))
         self.grid[grid_x][grid_y].addWall()
+        self.wall.append([x, y])
 
     def loadWorld(self, worldFile):
         self.reset()
@@ -140,7 +143,8 @@ class World:
             nest.pos[1]), 'size': nest.size, "species": nest.species_id} for nest in self.nests]
         data["food"] = [{'x': int(food.pos[0]), 'y': int(
             food.pos[1]), 'size': food.max_amount} for food in self.food]
-        #TODO : Mur
+        data["wall"] = [{'x': wall[0], 'y':
+                         wall[1]} for wall in self.wall]
         files = [('JSON File', '*.json')]
         filepos = asksaveasfile(filetypes=files, defaultextension=".json")
         if filepos is not None:

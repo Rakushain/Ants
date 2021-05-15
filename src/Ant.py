@@ -114,6 +114,7 @@ class Ant:
         self.check_nest()
 
         self.sense_pheromones()
+        self.sense_wall()
 
         # self.wander()
         self.handle_food()
@@ -135,10 +136,12 @@ class Ant:
         if new_pos[0] < 0 or new_pos[0] > self.world.width:
             self.velocity[0] = 0
             self.direction[0] = 0
+            print("aa")
 
         if new_pos[1] < 0 or new_pos[1] > self.world.height:
             self.velocity[1] = 0
             self.direction[1] = 0
+            print("aaa")
 
         new_pos = self.pos + self.velocity
         if new_pos[0] < 0 or new_pos[0] > self.world.width:
@@ -308,6 +311,13 @@ class Ant:
         """
 
         self.stamina = self.base_stamina
+    
+    def sense_wall(self):
+        grid_x, grid_y = self.world.worldToGrid(self.pos)        
+        if self.world.grid[grid_x][grid_y].is_wall:
+            print("lol")
+
+
 
 
 class Sensor:
