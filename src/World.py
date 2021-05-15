@@ -1,4 +1,5 @@
 import numpy as np
+from tkinter.filedialog import asksaveasfile
 from Food import Food
 from Nest import Nest
 from Cell import Cell
@@ -11,6 +12,7 @@ import json
 class World:
     nests = []
     food = []
+    wall = []
     started = False
     paused = True
     time = 0
@@ -89,6 +91,7 @@ class World:
 
         self.nests = []
         self.food = []
+        self.wall = []
 
         self.time = 0
 
@@ -105,6 +108,7 @@ class World:
     def addWall(self, x, y):
         grid_x, grid_y = self.worldToGrid(np.array([x, y]))
         self.grid[grid_x][grid_y].addWall()
+        self.wall.append([x, y])
 
     def loadWorld(self, worldFile):
         self.reset()
@@ -112,18 +116,41 @@ class World:
         with open(f"worlds/{worldFile}") as file:
             data = file.read()
             world_data = json.loads(data)
+            try:
+                for food in world_data['food']:
+                    self.addFood(
+                        Food(
+                            self.canvas,
+                            food['x'],
+                            food['y'],
+                            food['size']))
 
-            for food in world_data['food']:
-                self.addFood(
-                    Food(
-                        self.canvas,
-                        food['x'],
-                        food['y'],
-                        food['size']))
+                for nest in world_data['nests']:
+                    self.addNest(Nest(
+                        self, len(self.nests), nest['x'], nest['y'], nest['species'], nest['size']))
+                for wall in world_data["wall"]:
+                    self.addWall(wall['x'], wall['y'])
+            except BaseException:
+                pass
 
-            for nest in world_data['nests']:
-                self.addNest(Nest(
-                    self, len(self.nests), nest['x'], nest['y'], nest['species'], nest['size']))
+    def write_to_json(self, path, data):
+        json.dump(data, path)
+
+    def save_world(self):
+        self.stop()
+        data = {}
+        data["nests"] = [{'x': int(nest.pos[0]), 'y': int(
+            nest.pos[1]), 'size': nest.size, "species": nest.species_id} for nest in self.nests]
+        data["food"] = [{'x': int(food.pos[0]), 'y': int(
+            food.pos[1]), 'size': food.max_amount} for food in self.food]
+        data["wall"] = [{'x': wall[0], 'y':
+                         wall[1]} for wall in self.wall]
+        files = [('JSON File', '*.json')]
+        filepos = asksaveasfile(filetypes=files, defaultextension=".json")
+        if filepos is not None:
+            self.write_to_json(filepos, data)
+        else:
+            return
 
     def modifSpecies(self, speciesId, speed, stamina):
         species = self.species[speciesId]
