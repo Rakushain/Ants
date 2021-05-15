@@ -114,7 +114,6 @@ class Ant:
         self.check_nest()
 
         self.sense_pheromones()
-        self.sense_wall()
 
         # self.wander()
         self.handle_food()
@@ -132,25 +131,7 @@ class Ant:
             self.velocity = self.velocity / velocity_magnitude * \
                 self.speed * self.world.speed_value
 
-        new_pos = self.pos + self.velocity
-        if new_pos[0] < 0 or new_pos[0] > self.world.width:
-            self.velocity[0] = 0
-            self.direction[0] = 0
-            print("aa")
-
-        if new_pos[1] < 0 or new_pos[1] > self.world.height:
-            self.velocity[1] = 0
-            self.direction[1] = 0
-            print("aaa")
-
-        new_pos = self.pos + self.velocity
-        if new_pos[0] < 0 or new_pos[0] > self.world.width:
-            self.velocity[0] = 0
-            self.direction[0] = 0
-
-        if new_pos[1] < 0 or new_pos[1] > self.world.height:
-            self.velocity[1] = 0
-            self.direction[1] = 0
+        self.sense_wall()
 
         self.pos += self.velocity
         self.world.canvas.move(self.ant_id, self.velocity[0], self.velocity[1])
@@ -311,18 +292,51 @@ class Ant:
         """
 
         self.stamina = self.base_stamina
-    
+
     def sense_wall(self):
-        grid_x, grid_y = self.world.worldToGrid(self.pos)        
-        if self.world.grid[grid_x][grid_y].is_wall:
-            print("lol")
+        new_pos = self.pos + self.velocity
+        new_grid_x, new_grid_y = self.world.worldToGrid(new_pos)
 
+        check_walls = True
 
+        if new_pos[0] < 0:
+            self.velocity[0] = 1
+            self.direction[0] = 1
+            check_walls = False
 
+        if new_pos[0] > self.world.width:
+            self.velocity[0] = -1
+            self.direction[0] = -1
+            check_walls = False
 
-class Sensor:
-    def __init__(self):
-        pass
+        if new_pos[1] < 0:
+            self.velocity[1] = 1
+            self.direction[1] = 1
+            check_walls = False
 
-    def sense_pheromones(self, position, velocity, angle):
-        pass
+        if new_pos[1] > self.world.height:
+            self.velocity[1] = -1
+            self.direction[1] = -1
+            check_walls = False
+
+        if not check_walls:
+            return
+
+        if self.world.wall[new_grid_x, new_grid_y]:
+            if new_pos[0] < self.pos[0]:
+                self.velocity[0] = -1
+                self.direction[0] = -1
+            else:
+                self.velocity[0] = 1
+                self.direction[0] = 1
+
+            if new_pos[1] < self.pos[1]:
+                self.velocity[1] = -1
+                self.direction[1] = -1
+            else:
+                self.velocity[1] = 1
+                self.direction[1] = 1
+
+            self.velocity = self.velocity * -1
+
+        # if self.world.wall
