@@ -209,6 +209,8 @@ class Ant:
             )
 
     def sense_pheromones(self):
+        #normaliser le vec -> toujours de longueur 1 -> multiplier par la vitesse
+        #si on normalise pas le vecteur ,la fourmi ira plus vite en diagonale que dans les directions classiques
         sensor_fwd = self.view_distance * \
             self.velocity / np.linalg.norm(self.velocity)
         sensor_left = rotate(sensor_fwd,
