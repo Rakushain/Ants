@@ -60,7 +60,7 @@ class MainGUI:
     def handle_canvas_click(self, event):
         print(event.x, event.y)
         if (not self.is_modifying.get()):
-            grid_x, grid_y = self.world.worldToGrid(np.array(event.x, event.y))
+            grid_x, grid_y = self.world.worldToGrid(np.array([event.x, event.y]))
             self.world.addWall(grid_x, grid_y)
             return
 
@@ -90,7 +90,8 @@ class MainGUI:
         if self.is_modifying.get():
             return
 
-        self.world.addWall(event.x, event.y)
+        grid_x, grid_y = self.world.worldToGrid(np.array([event.x, event.y]))
+        self.world.addWall(grid_x, grid_y)
 
     def create_canvas(self):
         frame = tk.Frame(self.root)
