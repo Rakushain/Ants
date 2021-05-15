@@ -31,6 +31,7 @@ class MainGUI:
         self.species_food = tk.StringVar()
         self.foodOrNest = tk.IntVar(value=FoodOrNest.FOOD)
         self.speciesId = tk.IntVar(value=0)
+        self.speciesId.trace_add('write', self.on_species_select)
         self.is_modifying = tk.BooleanVar(value=False)
         # self.is_modifying.trace_add('write', self.on_modif_state_change)
 
@@ -59,7 +60,8 @@ class MainGUI:
     def handle_canvas_click(self, event):
         print(event.x, event.y)
         if (not self.is_modifying.get()):
-            self.world.addWall(event.x, event.y)
+            grid_x, grid_y = self.world.worldToGrid(np.array(event.x, event.y))
+            self.world.addWall(grid_x, grid_y)
             return
 
         if self.world.started:
@@ -118,6 +120,8 @@ class MainGUI:
 
         self.create_species_traits(frame)
 
+        self.create_sun_check(frame)
+
         self.create_size_dropdown(frame)
 
         frame.pack(fill="both", padx=5, pady=5)
@@ -175,10 +179,16 @@ class MainGUI:
 
         frame.pack(side=tk.LEFT)
 
+    def on_species_select(self, *_):
+        species = self.world.species[self.speciesId.get()]
+
+        for trait, _ in species_defaults.items():
+            print(trait, species[trait])
+
     def create_species_traits(self, parent):
         frame = tk.Frame(parent)
 
-        self.species_traits_entries = []
+        self.species_traits_entries = {}
 
         self.wrong_value_popup_open = False
 
@@ -189,42 +199,38 @@ class MainGUI:
             vcmd = (frame.register(self.validate_species_trait),
                     trait, '%P')
 
-            label = tk.Label(frame, text=trait, anchor=tk.W)
+            label = tk.Label(frame, text=val['name'], anchor=tk.W)
             label.grid(column=x, row=y, sticky=tk.NSEW)
 
             entry = tk.Entry(frame)
             entry.insert(0, val['value'])
             entry.configure(
                 state=tk.DISABLED,
-                validate='key',
+                validate='focusout',
                 validatecommand=vcmd
             )
             entry.grid(column=x + 1, row=y, sticky=tk.NSEW)
-            self.species_traits_entries.append(entry)
+            self.species_traits_entries[trait] = entry
 
         frame.pack(side=tk.LEFT)
 
     def validate_species_trait(self, trait, str_val):
+        trait_defaults = species_defaults[trait]
+        min_val = trait_defaults['min']
+        max_val = trait_defaults['max']
+
+        try:
+            new_val = float(str_val)
+            if new_val >= min_val and new_val <= max_val:
+                self.world.species[self.speciesId.get()].update_trait(
+                    trait, new_val)
+            else:
+                raise ValueError
+        except ValueError:
+            self.spawn_wrong_value_popup(
+                trait, min_val, max_val, str_val)
+
         return True
-
-        # trait_defaults = species_defaults[trait]
-        # min_val = trait_defaults['min']
-        # max_val = trait_defaults['max']
-
-        # valid = False
-
-        # try:
-        #     new_val = float(str_val)
-        #     if new_val >= trait_defaults['min'] and new_val <= trait_defaults['max']:
-        #         self.world.species[self.speciesId.get()].update_trait(
-        #             trait, new_val)
-        #         valid = True
-        # except ValueError:
-        #     pass
-
-        # if not valid:
-        #     self.spawn_wrong_value_popup(
-        #         trait, min_val, max_val, str_val)
 
         # return valid
 
@@ -235,6 +241,7 @@ class MainGUI:
         else:
             self.is_modifying.set(
                 not self.is_modifying.get())
+
         print(self.world.started, ' & ', self.is_modifying.get(), '\n')
 
         self.modif_button.configure(
@@ -242,11 +249,12 @@ class MainGUI:
 
         elements = [
             *self.species_radios,
-            *self.species_traits_entries,
+            *[entry for _, entry in self.species_traits_entries.items()],
             self.foodRadio,
             self.nestRadio,
             self.foodOrNestAmountInput,
-            self.opt_world_size
+            self.opt_world_size,
+            self.sun_check
         ]
 
         for element in elements:
@@ -300,15 +308,23 @@ class MainGUI:
 
         label_size = tk.Label(parent, text="Taille monde:")
         label_size.config(width=15, font=("Helvetica", 16))
-        label_size.pack(side=tk.LEFT)
+        label_size.pack(side=tk.LEFT, anchor = tk.NW)
 
         self.opt_world_size = tk.OptionMenu(
             parent, self.world_size, *OptionList)
         self.opt_world_size.config(
             width=15, font=(
                 "Helvetica", 12), state=tk.DISABLED)
-        self.opt_world_size.pack(side=tk.LEFT)
+        self.opt_world_size.pack(side=tk.LEFT, anchor = tk.NW)
 
+    def create_sun_check(self, parent):
+        frame = tk.Frame(parent)
+        self.sun_check = tk.Checkbutton(frame)
+        self.sun_check.config(text = "Mode Soleil", width=15, font=(
+                "Helvetica", 12), state = tk.DISABLED)
+        self.sun_check.pack(side = tk.LEFT)
+        frame.pack(side = tk.BOTTOM, anchor = tk.SW)
+    
     def udpate_world_size(self, *_):
         world_size = self.world_size.get()
         self.world.reset_grid(world_size, world_size)
@@ -467,7 +483,7 @@ class MainGUI:
                  "-La vitesse de la simulation peut etre modifiée, allant de x 0.25 à x 2.0"
                  ]
         for i in range(len(liste)):
-            l = tk.Label(win, text=liste[i]).pack(side=tk.TOP, anchor=tk.W)
+            tk.Label(win, text=liste[i]).pack(side=tk.TOP, anchor=tk.W)
 
         b = tk.Button(win, text="Ok", command=win.destroy)
         b.pack(side=tk.BOTTOM)

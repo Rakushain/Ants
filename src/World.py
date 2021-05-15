@@ -91,7 +91,7 @@ class World:
 
         self.nests = []
         self.food = []
-        self.wall = []
+        self.wall = np.zeros((self.cellsX, self.cellsY))
 
         self.time = 0
 
@@ -105,10 +105,9 @@ class World:
             return
         self.nests.append(nest)
 
-    def addWall(self, x, y):
-        grid_x, grid_y = self.worldToGrid(np.array([x, y]))
+    def addWall(self, grid_x, grid_y):
         self.grid[grid_x][grid_y].addWall()
-        self.wall.append([x, y])
+        self.wall[grid_x, grid_y] = True
 
     def loadWorld(self, worldFile):
         self.reset()
@@ -128,8 +127,11 @@ class World:
                 for nest in world_data['nests']:
                     self.addNest(Nest(
                         self, len(self.nests), nest['x'], nest['y'], nest['species'], nest['size']))
-                for wall in world_data["wall"]:
-                    self.addWall(wall['x'], wall['y'])
+
+                if (world_data["wall"]):
+                    for wall in world_data["wall"]:
+                        self.addWall(wall[0], wall[1])
+
             except BaseException:
                 pass
 
@@ -143,8 +145,14 @@ class World:
             nest.pos[1]), 'size': nest.size, "species": nest.species_id} for nest in self.nests]
         data["food"] = [{'x': int(food.pos[0]), 'y': int(
             food.pos[1]), 'size': food.max_amount} for food in self.food]
-        data["wall"] = [{'x': wall[0], 'y':
-                         wall[1]} for wall in self.wall]
+
+        only_walls = []
+        for x in range(self.cellsX):
+            for y in range(self.cellsY):
+                if self.wall[x][y]:
+                    only_walls.append([x, y])
+        data["wall"] = only_walls
+
         files = [('JSON File', '*.json')]
         filepos = asksaveasfile(filetypes=files, defaultextension=".json")
         if filepos is not None:
