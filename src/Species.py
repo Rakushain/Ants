@@ -4,7 +4,7 @@ species_defaults = {
     "speed": {"name": "Vitesse", "min": 1, "max": 10, "value": 4},
     "stamina": {"name": "Endurance", "min": 1, "max": 1000, "value": 350},
     "evaporation": {"name": "Evaporation", "min": 1, "max": 1000, "value": 1000},
-    "range": {"name": "Portee", "min": 1, "max": 20, "value": 10},
+    "view_distance": {"name": "Portee", "min": 1, "max": 20, "value": 10},
     "exploration": {"name": "Exploration", "min": 0.1, "max": 0.9, "value": 0.1},
     "Retour": {"name": "Retour", "min": 0, "max": 0, "value": 0},
     "wander_chance": {"name": "Suivi phero.", "min": 0, "max": 0, "value": 0},
