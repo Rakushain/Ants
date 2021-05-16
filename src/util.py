@@ -10,12 +10,12 @@ def create_circle(canvas, x, y, r, color, **kwargs):
     return canvas.create_oval(x0, y0, x1, y1, fill=color, **kwargs)
 
 
-def rgbtohex(rgb):
+def rgb_to_hex(rgb):
     r, g, b = rgb
     return f'#{floor(r):02x}{floor(g):02x}{floor(b):02x}'
 
 
-def vectRot(vect, angle):
+def vect_rot(vect, angle):
     rot = np.array([[cos(angle), -sin(angle)], [sin(angle), cos(angle)]])
     return np.dot(rot, vect)
 

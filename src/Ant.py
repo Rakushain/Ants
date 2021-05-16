@@ -1,5 +1,5 @@
 import numpy as np
-from util import create_circle, vectRot, random_inside_circle, distance, rotate
+from util import create_circle, vect_rot, random_inside_circle, distance, rotate
 
 
 class Ant:
@@ -102,13 +102,13 @@ class Ant:
             Returns:
                 None
         """
-        grid_x, grid_y = self.world.worldToGrid(self.pos)
+        grid_x, grid_y = self.world.world_to_grid(self.pos)
 
         # Test si fourmi est dans la grille
         if grid_x >= 0 and grid_x < self.world.cellsX and grid_y >= 0 and grid_y < self.world.cellsY:
             if self.has_food:
                 # TODO: variable amount
-                self.world.grid[grid_x, grid_y].addPheromones(
+                self.world.grid[grid_x, grid_y].add_pheromones(
                     self.species_id, self.pos)  # TODO: Color
 
         self.check_nest()
@@ -187,7 +187,7 @@ class Ant:
         if dist < self.food_disposal_distance:
             self.stamina = self.base_stamina
             if self.has_food:
-                self.world.nests[self.nest_id].addFood(self.food_amount)
+                self.world.nests[self.nest_id].add_food(self.food_amount)
                 self.has_food = False
                 self.food_target = None
                 self.direction = random_inside_circle()
@@ -250,7 +250,7 @@ class Ant:
 
         pheromones = [0, 0, 0, self.wander_chance]
         for i, sensor in enumerate(self.sensors):
-            grid_x, grid_y = self.world.worldToGrid(sensor + self.pos)
+            grid_x, grid_y = self.world.world_to_grid(sensor + self.pos)
 
             top_left = np.array([grid_x - 1, grid_y - 1])
             btm_right = np.array([grid_x + 2, grid_y + 2])
@@ -298,7 +298,7 @@ class Ant:
 
     def sense_wall(self):
         new_pos = self.pos + self.velocity
-        new_grid_x, new_grid_y = self.world.worldToGrid(new_pos)
+        new_grid_x, new_grid_y = self.world.world_to_grid(new_pos)
 
         check_walls = True
 

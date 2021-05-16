@@ -1,6 +1,6 @@
 import numpy as np
 from Ant import Ant
-from util import rgbtohex, create_circle
+from util import rgb_to_hex, create_circle
 
 
 class Nest:
@@ -18,14 +18,14 @@ class Nest:
 
         self.color = species.color
         self.inv_color = np.array([255 - val for val in self.color])
-        hexColor = rgbtohex(self.color)
+        hex_color = rgb_to_hex(self.color)
         self.canvas_id = create_circle(
-            self.world.canvas, x, y, self.scale, hexColor)
+            self.world.canvas, x, y, self.scale, hex_color)
 
-        self.ants = [Ant(self.world, self, i, species.speed, species.stamina, hexColor)
+        self.ants = [Ant(self.world, self, i, species.speed, species.stamina, hex_color)
                      for i in range(nAnts)]
 
-    def addFood(self, amount):
+    def add_food(self, amount):
         self.food += amount
         self.world.species[self.species_id].add_food(amount)
         print(f"Nid {self.nest_id}: {self.food} food")

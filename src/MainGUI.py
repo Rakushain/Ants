@@ -36,6 +36,8 @@ class MainGUI:
         self.is_modifying = tk.BooleanVar(value=False)
         # self.is_modifying.trace_add('write', self.update_ants_traits)
 
+        self.new_world = 0
+
         self.create_frame_top()
         self.create_canvas()
         self.create_frame_bottom()
@@ -50,6 +52,8 @@ class MainGUI:
             maxFood,
             maxNests)
 
+        self.speciesId.trace_add('write', self.on_species_select)
+
         self.world.loadWorld("1 espece et 1 ressource.json")
 
         self.root.mainloop()
@@ -61,9 +65,9 @@ class MainGUI:
     def handle_canvas_click(self, event):
         print(event.x, event.y)
         if (not self.is_modifying.get()):
-            grid_x, grid_y = self.world.worldToGrid(
+            grid_x, grid_y = self.world.world_to_grid(
                 np.array([event.x, event.y]))
-            self.world.addWall(grid_x, grid_y)
+            self.world.add_wall(grid_x, grid_y)
             return
 
         if self.world.started:
@@ -77,23 +81,24 @@ class MainGUI:
         if self.foodOrNest.get() == FoodOrNest.FOOD and len(
                 self.world.food) < self.world.maxFood:
             if 0 < amount <= 30:
-                self.world.addFood(Food(self.canvas, event.x, event.y, amount))
+                self.world.add_food(Food(self.canvas, event.x, event.y, amount))
             else:
                 self.spawn_wrong_value_popup("nourriture", 1, 30, amount)
         elif self.foodOrNest.get() == FoodOrNest.NEST and len(self.world.nests) < self.world.maxNests:
             if 0 < amount <= 100:
-                self.world.addNest(
+                self.world.add_nest(
                     Nest(self.world, len(self.world.nests), event.x, event.y, self.speciesId.get(), amount))
             else:
                 self.spawn_wrong_value_popup(
                     "population de nid", 1, 100, amount)
+        self.opt_world_size.configure(state=tk.DISABLED)
 
     def handle_canvas_drag(self, event):
         if self.is_modifying.get():
             return
 
-        grid_x, grid_y = self.world.worldToGrid(np.array([event.x, event.y]))
-        self.world.addWall(grid_x, grid_y)
+        grid_x, grid_y = self.world.world_to_grid(np.array([event.x, event.y]))
+        self.world.add_wall(grid_x, grid_y)
 
     def create_canvas(self):
         frame = tk.Frame(self.root)
@@ -261,9 +266,11 @@ class MainGUI:
             self.foodRadio,
             self.nestRadio,
             self.foodOrNestAmountInput,
-            self.opt_world_size,
             self.sun_check
         ]
+        self.opt_world_size.configure(state=tk.NORMAL if self.is_modifying.get(
+        ) and self.new_world == 1 else tk.DISABLED)
+        self.new_world = 0
 
         for element in elements:
             element.configure(
@@ -290,7 +297,7 @@ class MainGUI:
             loadWorldVar,
             'Nouveau Monde',
             *loadWorldOptions,
-            command=lambda filename: self.world.loadWorld(f"{filename}.json") if filename != 'Nouveau Monde' else self.world.reset())
+            command=lambda filename: self.world.loadWorld(f"{filename}.json") if filename != 'Nouveau Monde' else [self.world.reset(), self.update_new_world_value()])
 
         loadWorldDrop.pack(side=tk.LEFT)
 
@@ -312,7 +319,7 @@ class MainGUI:
         ]
         self.world_size = tk.IntVar(parent)
         self.world_size.set(OptionList[1])
-        self.world_size.trace_add('write', self.udpate_world_size)
+        self.world_size.trace_add('write', self.update_world_size)
 
         label_size = tk.Label(parent, text="Taille monde:")
         label_size.config(width=15, font=("Helvetica", 16))
@@ -333,9 +340,11 @@ class MainGUI:
         self.sun_check.pack(side=tk.LEFT)
         frame.pack(side=tk.BOTTOM, anchor=tk.SW)
 
-    def udpate_world_size(self, *_):
-        world_size = self.world_size.get()
-        self.world.reset_grid(world_size, world_size)
+    def update_world_size(self, *_):
+        # si le canvas est vide, on change la taille du monde
+        if len(self.canvas.find_all()) == 2560:
+            world_size = self.world_size.get()
+            self.world.reset_grid(world_size, world_size)
 
     def create_frame_bottom(self):
         frame = tk.Frame(self.root, bg='grey')
@@ -394,6 +403,9 @@ class MainGUI:
         #  Permet de mettre le temps à jour sur le label correspondant
         self.label_time.config(text=int(self.world.time))
 
+    def update_new_world_value(self):
+        self.new_world = 1
+
     def update_species_food(self):
         # Fonction utilise pour montrer la repartition de la nourriture entre
         # especes
@@ -420,6 +432,7 @@ class MainGUI:
             self.is_modifying.set(False)
             self.world.start()
             self.update_time()
+            self.on_modif_state_change()
             self.update_species_food()
             self.button_go["text"] = "Stop"
         else:
