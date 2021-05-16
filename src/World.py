@@ -144,6 +144,8 @@ class World:
                 if (world_data["wall"]):
                     for wall in world_data["wall"]:
                         self.add_wall(wall[0], wall[1])
+                for traits in world_data["species"]:
+                    
 
             except BaseException:
                 pass
@@ -165,6 +167,20 @@ class World:
                 if self.wall[x][y]:
                     only_walls.append([x, y])
         data["wall"] = only_walls
+        all_traits = []
+        #  sauvegarde des caracteristiques des fourmis
+        for i in range(4):
+            all_traits += [{"speed": self.species[i].speed,
+                                "stamina": self.species[i].stamina,
+                                "evaporation": self.species[i].evaporation,
+                                "view_distance": self.species[i].view_distance,
+                                "exploration": self.species[i].exploration,
+                                "comeback": self.species[i].comeback,
+                                "wander_chance": self.species[i].speed,
+                                "deposit": self.species[i].deposit,
+                                "random_move": self.species[i].random_move}]
+        data["species"] = all_traits
+        
 
         files = [('JSON File', '*.json')]
         filepos = asksaveasfile(filetypes=files, defaultextension=".json")
@@ -172,19 +188,6 @@ class World:
             self.write_to_json(filepos, data)
         else:
             return
-
-    def modif_species(self, speciesId, speed, stamina, evaporation, view_distance,
-                      exploration, comeback, wander_chance, deposit, random_move):
-        species = self.species[speciesId]
-        species.speed = speed
-        species.stamina = stamina
-        species.evaporation = evaporation
-        species.view_distance = view_distance
-        species.exploration = exploration
-        species.comeback = comeback
-        species.wander_chance = wander_chance
-        species.deposit = deposit
-        species.random_move = random_move
 
     def reset_grid(self, size_x, size_y):
         self.cellsX = size_x
