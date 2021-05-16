@@ -42,9 +42,19 @@ class Cell:
                 pos,
                 self.world.time))
 
+        self.update_color()
+
+    def update_color(self):
+        color = np.array([0, 0, 0])
+        for species_id, species_pheromones in enumerate(self.pheromones):
+            color += self.world.species[species_id].inv_color * \
+                len(species_pheromones)
+
+        color = np.clip(np.around(color / 100), 0, 255)
+        color = np.array([255 - val for val in color])
+
         self.world.canvas.itemconfig(
-            self.canvas_id, fill=rgb_to_hex([
-                np.clip(int(255 - 10 * len(self.pheromones[species_id])), 0, 255), 255, 255]))
+            self.canvas_id, fill=rgb_to_hex(color))
 
     def reset(self):
         self.world.canvas.itemconfig(self.canvas_id, fill="white")

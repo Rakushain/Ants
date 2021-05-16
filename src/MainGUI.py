@@ -59,10 +59,8 @@ class MainGUI:
 
     def create_world(self):
         self.world.reset()
-        print(sys.getrefcount(self.canvas))
 
     def handle_canvas_click(self, event):
-        print(event.x, event.y)
         if (not self.is_modifying.get()):
             grid_x, grid_y = self.world.world_to_grid(
                 np.array([event.x, event.y]))
@@ -252,14 +250,11 @@ class MainGUI:
 
     def on_modif_state_change(self, *_):
         self.root.focus()
-        print(self.world.started, ' & ', self.is_modifying.get())
         if self.world.started:
             self.is_modifying.set(False)
         else:
             self.is_modifying.set(
                 not self.is_modifying.get())
-
-        print(self.world.started, ' & ', self.is_modifying.get(), '\n')
 
         self.modif_button.configure(
             text='OK' if self.is_modifying.get() else 'Modifier')
@@ -451,7 +446,6 @@ class MainGUI:
         """
         Cree un popup quand la taille d une ressource n est pas comprise entre sa valeur minimale et maximale
         """
-        print('xd', self.wrong_value_popup_open)
         if self.wrong_value_popup_open:
             return
 

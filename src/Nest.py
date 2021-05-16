@@ -17,7 +17,6 @@ class Nest:
         species.set_active()
 
         self.color = species.color
-        self.inv_color = np.array([255 - val for val in self.color])
         hex_color = rgb_to_hex(self.color)
         self.canvas_id = create_circle(
             self.world.canvas, x, y, self.scale, hex_color)
@@ -28,4 +27,3 @@ class Nest:
     def add_food(self, amount):
         self.food += amount
         self.world.species[self.species_id].add_food(amount)
-        print(f"Nid {self.nest_id}: {self.food} food")

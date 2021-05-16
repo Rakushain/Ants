@@ -61,7 +61,6 @@ class World:
 
         self.started = True
         self.paused = False
-        print("START")
         self.update()
 
     def stop(self):
@@ -196,8 +195,6 @@ class World:
         for row in self.grid:
             for cell in row:
                 cell.reset()
-
-        # print(self.grid)
 
     def update(self):
         if not self.started:

@@ -17,7 +17,9 @@ class Species:
     def __init__(self, species_id, color):
         self.species_id = species_id
         self.color = color
-        self.speed = 0
+        self.inv_color = np.array([255 - val for val in self.color])
+        for trait, value in species_defaults.items():
+            setattr(self, trait, value['fn'](value['value']))
 
         self.reset()
 
