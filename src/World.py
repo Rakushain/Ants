@@ -16,12 +16,13 @@ class World:
     started = False
     paused = True
     time = 0
+    charged = 0
 
     species = [
-        Species(0, np.array([255, 0, 0]), 4, 350),
-        Species(1, np.array([0, 255, 0]), 4, 350),
-        Species(2, np.array([0, 0, 255]), 4, 350),
-        Species(3, np.array([255, 255, 0]), 4, 350),
+        Species(0, np.array([255, 0, 0]), 4, 350, 1000, 10, 0.1, 0, 0, 0, 0),
+        Species(1, np.array([0, 255, 0]), 4, 350, 1000, 10, 0.1, 0, 0, 0, 0),
+        Species(2, np.array([0, 0, 255]), 4, 350, 1000, 10, 0.1, 0, 0, 0, 0),
+        Species(3, np.array([255, 255, 0]), 4, 350, 1000, 10, 0.1, 0, 0, 0, 0)
     ]
 
     def __init__(self, main_gui, canvas, width, height,
@@ -71,6 +72,9 @@ class World:
 
     def reset(self):
         self.stop()
+        
+        self.main_gui.button_go.configure(text = "Go =>")
+        self.main_gui.speciesId.set(0)
 
         for nest in self.nests:
             for ant in nest.ants:
@@ -92,32 +96,35 @@ class World:
         self.nests = []
         self.food = []
         self.wall = np.zeros((self.cellsX, self.cellsY))
-
         self.time = 0
 
-    def addFood(self, food):
+    def add_food(self, food):
         if (len(self.food) >= self.maxFood):
             return
         self.food.append(food)
 
-    def addNest(self, nest):
+    def add_nest(self, nest):
         if (len(self.nests) >= self.maxNests):
             return
         self.nests.append(nest)
 
-    def addWall(self, grid_x, grid_y):
-        self.grid[grid_x][grid_y].addWall()
+    def add_wall(self, grid_x, grid_y):
+        self.grid[grid_x][grid_y].add_wall()
         self.wall[grid_x, grid_y] = True
 
     def loadWorld(self, worldFile):
         self.reset()
         self.main_gui.button_go["text"] = "Go =>"
+        if self.charged > 0:
+            self.main_gui.on_modif_state_change()
+        self.charged += 1
+        
         with open(f"worlds/{worldFile}") as file:
             data = file.read()
             world_data = json.loads(data)
             try:
                 for food in world_data['food']:
-                    self.addFood(
+                    self.add_food(
                         Food(
                             self.canvas,
                             food['x'],
@@ -125,15 +132,16 @@ class World:
                             food['size']))
 
                 for nest in world_data['nests']:
-                    self.addNest(Nest(
+                    self.add_nest(Nest(
                         self, len(self.nests), nest['x'], nest['y'], nest['species'], nest['size']))
 
                 if (world_data["wall"]):
                     for wall in world_data["wall"]:
-                        self.addWall(wall[0], wall[1])
+                        self.add_wall(wall[0], wall[1])
 
             except BaseException:
                 pass
+        
 
     def write_to_json(self, path, data):
         json.dump(data, path)
@@ -159,11 +167,19 @@ class World:
             self.write_to_json(filepos, data)
         else:
             return
+        
 
-    def modifSpecies(self, speciesId, speed, stamina):
+    def modif_species(self, speciesId, speed, stamina, evaporation, view_distance, exploration, comeback, wander_chance, deposit, random_move):
         species = self.species[speciesId]
         species.speed = speed
         species.stamina = stamina
+        species.evaporation = evaporation
+        species.view_distance = view_distance
+        species.exploration = exploration
+        species.comeback = comeback
+        species.wander_chance = wander_chance
+        species.deposit = deposit
+        species.random_move = random_move
 
     def reset_grid(self, size_x, size_y):
         self.cellsX = size_x
@@ -175,7 +191,7 @@ class World:
             for cell in row:
                 cell.reset()
 
-        # print(self.grid)
+        #print(self.grid)
 
     def update(self):
         if not self.started:
@@ -195,7 +211,7 @@ class World:
         # self.main_gui.label_time.config(text=self.main_gui.update_time())
         self.canvas.after(20, self.update)
 
-    def worldToGrid(self, pos):
+    def world_to_grid(self, pos):
         x, y = pos
         return np.array([int(x / self.width * self.cellsX), int(y /
                                                                 self.height * self.cellsY)])

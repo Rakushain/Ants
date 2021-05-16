@@ -1,5 +1,5 @@
 import numpy as np
-from util import rgbtohex
+from util import rgb_to_hex
 from Pheromones import Pheromones
 
 
@@ -9,7 +9,7 @@ class Cell:
         self.world = world
         self.pos = np.array([x, y])
         self.world_pos = np.array([x * world.cellW, y * world.cellH])
-        self.canvasId = self.world.canvas.create_rectangle(
+        self.canvas_id = self.world.canvas.create_rectangle(
             self.world_pos[0],
             self.world_pos[1],
             self.world_pos[0] + world.cellW,
@@ -34,7 +34,7 @@ class Cell:
 
         return total_pheromones
 
-    def addPheromones(self, species_id, pos):
+    def add_pheromones(self, species_id, pos):
         self.pheromones[species_id].append(
             Pheromones(
                 self.world,
@@ -43,17 +43,17 @@ class Cell:
                 self.world.time))
 
         self.world.canvas.itemconfig(
-            self.canvasId, fill=rgbtohex([
+            self.canvas_id, fill=rgb_to_hex([
                 np.clip(int(255 - 10 * len(self.pheromones[species_id])), 0, 255), 255, 255]))
 
     def reset(self):
-        self.world.canvas.itemconfig(self.canvasId, fill="white")
+        self.world.canvas.itemconfig(self.canvas_id, fill="white")
         for species in self.pheromones:
             for pheromone in species:
                 # self.world.canvas.delete(pheromone.id)
                 del pheromone
 
-    def addWall(self):
+    def add_wall(self):
         self.is_wall = True
         self.world.canvas.itemconfig(
-            self.canvasId, fill="black")
+            self.canvas_id, fill="black")
