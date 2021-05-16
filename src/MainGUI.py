@@ -31,9 +31,10 @@ class MainGUI:
         self.species_food = tk.StringVar()
         self.foodOrNest = tk.IntVar(value=FoodOrNest.FOOD)
         self.speciesId = tk.IntVar(value=0)
+        self.previous_species_id = tk.IntVar(value=0)
         self.speciesId.trace_add('write', self.on_species_select)
         self.is_modifying = tk.BooleanVar(value=False)
-        # self.is_modifying.trace_add('write', self.on_modif_state_change)
+        # self.is_modifying.trace_add('write', self.update_ants_traits)
 
         self.create_frame_top()
         self.create_canvas()
@@ -60,7 +61,8 @@ class MainGUI:
     def handle_canvas_click(self, event):
         print(event.x, event.y)
         if (not self.is_modifying.get()):
-            grid_x, grid_y = self.world.worldToGrid(np.array([event.x, event.y]))
+            grid_x, grid_y = self.world.worldToGrid(
+                np.array([event.x, event.y]))
             self.world.addWall(grid_x, grid_y)
             return
 
@@ -181,10 +183,16 @@ class MainGUI:
         frame.pack(side=tk.LEFT)
 
     def on_species_select(self, *_):
+        self.root.focus()
+        previous_species = self.world.species[self.previous_species_id.get()]
         species = self.world.species[self.speciesId.get()]
 
-        for trait, _ in species_defaults.items():
-            print(trait, species[trait])
+        for trait, entry in self.species_traits_entries.items():
+            previous_species.update_trait(trait, entry.get())
+            entry.delete(0, tk.END)
+            entry.insert(0, species[trait])
+
+        self.previous_species_id.set(self.speciesId.get())
 
     def create_species_traits(self, parent):
         frame = tk.Frame(parent)
@@ -233,9 +241,8 @@ class MainGUI:
 
         return True
 
-        # return valid
-
     def on_modif_state_change(self, *_):
+        self.root.focus()
         print(self.world.started, ' & ', self.is_modifying.get())
         if self.world.started:
             self.is_modifying.set(False)
@@ -309,23 +316,23 @@ class MainGUI:
 
         label_size = tk.Label(parent, text="Taille monde:")
         label_size.config(width=15, font=("Helvetica", 16))
-        label_size.pack(side=tk.LEFT, anchor = tk.NW)
+        label_size.pack(side=tk.LEFT, anchor=tk.NW)
 
         self.opt_world_size = tk.OptionMenu(
             parent, self.world_size, *OptionList)
         self.opt_world_size.config(
             width=15, font=(
                 "Helvetica", 12), state=tk.DISABLED)
-        self.opt_world_size.pack(side=tk.LEFT, anchor = tk.NW)
+        self.opt_world_size.pack(side=tk.LEFT, anchor=tk.NW)
 
     def create_sun_check(self, parent):
         frame = tk.Frame(parent)
         self.sun_check = tk.Checkbutton(frame)
-        self.sun_check.config(text = "Mode Soleil", width=15, font=(
-                "Helvetica", 12), state = tk.DISABLED)
-        self.sun_check.pack(side = tk.LEFT)
-        frame.pack(side = tk.BOTTOM, anchor = tk.SW)
-    
+        self.sun_check.config(text="Mode Soleil", width=15, font=(
+            "Helvetica", 12), state=tk.DISABLED)
+        self.sun_check.pack(side=tk.LEFT)
+        frame.pack(side=tk.BOTTOM, anchor=tk.SW)
+
     def udpate_world_size(self, *_):
         world_size = self.world_size.get()
         self.world.reset_grid(world_size, world_size)

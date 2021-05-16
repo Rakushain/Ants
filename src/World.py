@@ -18,10 +18,10 @@ class World:
     time = 0
 
     species = [
-        Species(0, np.array([255, 0, 0]), 4, 350),
-        Species(1, np.array([0, 255, 0]), 4, 350),
-        Species(2, np.array([0, 0, 255]), 4, 350),
-        Species(3, np.array([255, 255, 0]), 4, 350),
+        Species(0, np.array([255, 0, 0])),
+        Species(1, np.array([0, 255, 0])),
+        Species(2, np.array([0, 0, 255])),
+        Species(3, np.array([255, 255, 0])),
     ]
 
     def __init__(self, main_gui, canvas, width, height,
@@ -51,6 +51,13 @@ class World:
         self.reset()
 
     def start(self):
+        for nest in self.nests:
+            species = self.species[nest.species_id]
+            for ant in nest.ants:
+                ant.speed = species.speed
+                ant.stamina = species.stamina
+                ant.base_stamina = species.stamina
+
         self.started = True
         self.paused = False
         print("START")

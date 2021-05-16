@@ -209,8 +209,9 @@ class Ant:
             )
 
     def sense_pheromones(self):
-        #normaliser le vec -> toujours de longueur 1 -> multiplier par la vitesse
-        #si on normalise pas le vecteur ,la fourmi ira plus vite en diagonale que dans les directions classiques
+        # normaliser le vec -> toujours de longueur 1 -> multiplier par la vitesse
+        # si on normalise pas le vecteur ,la fourmi ira plus vite en diagonale
+        # que dans les directions classiques
         sensor_fwd = self.view_distance * \
             self.velocity / np.linalg.norm(self.velocity)
         sensor_left = rotate(sensor_fwd,
@@ -324,15 +325,17 @@ class Ant:
         if not check_walls:
             return
 
+        grid_x, grid_y = self.world.worldToGrid(self.pos)
+
         if self.world.wall[new_grid_x, new_grid_y]:
-            if new_pos[0] < self.pos[0]:
+            if new_grid_x < grid_x:
                 self.velocity[0] = -1
                 self.direction[0] = -1
             else:
                 self.velocity[0] = 1
                 self.direction[0] = 1
 
-            if new_pos[1] < self.pos[1]:
+            if new_grid_y < grid_y:
                 self.velocity[1] = -1
                 self.direction[1] = -1
             else:
