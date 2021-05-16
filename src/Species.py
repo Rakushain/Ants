@@ -17,12 +17,14 @@ class Species:
     def __init__(self, species_id, color):
         self.species_id = species_id
         self.color = color
-        for trait, value in species_defaults.items():
-            setattr(self, trait, value['fn'](value['value']))
+        self.speed = 0
 
         self.reset()
 
     def __getitem__(self, key):
+        if key in species_defaults.keys():
+            value = species_defaults[key]
+            return (getattr(self, key, value['value']))
         return getattr(self, key)
 
     def reset(self):
@@ -36,5 +38,4 @@ class Species:
         self.food += amount
 
     def update_trait(self, trait, value):
-        print('xd', trait, value)
-        setattr(self, trait, value)
+        setattr(self, trait, species_defaults[trait]['fn'](value))

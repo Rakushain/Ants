@@ -32,7 +32,6 @@ class MainGUI:
         self.foodOrNest = tk.IntVar(value=FoodOrNest.FOOD)
         self.speciesId = tk.IntVar(value=0)
         self.previous_species_id = tk.IntVar(value=0)
-        self.speciesId.trace_add('write', self.on_species_select)
         self.is_modifying = tk.BooleanVar(value=False)
         # self.is_modifying.trace_add('write', self.update_ants_traits)
 

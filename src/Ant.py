@@ -29,7 +29,7 @@ class Ant:
     # Chance que la fourmi parte dans une direction aléatoire
     wander_chance = 0.1
 
-    def __init__(self, world, nest, ant_id, speed, stamina, color):
+    def __init__(self, world, nest, ant_id, color):
         """
             Initialisation de la Fourmi.
             Args:
@@ -54,11 +54,13 @@ class Ant:
 
         self.steer_strength = 0.25  # virage serre
         self.wander_strength = 10  # definit la déviation de la trajectoire actuelle
-        self.speed = speed  # speed
+
+        species = self.world.species[self.species_id]
+        self.speed = species.speed  # speed
         self.velocity = self.direction * self.speed * self.world.speed_value
 
-        self.base_stamina = stamina
-        self.stamina = stamina
+        self.base_stamina = species.stamina
+        self.stamina = species.stamina
         self.color = color
 
         self.ant_id = f"ANT_{nest.nest_id}_{ant_id}"
@@ -90,7 +92,7 @@ class Ant:
             self.pos[0],
             self.pos[1],
             2,
-            color, tags=self.ant_id)
+            self.color, tags=self.ant_id)
 
     def update(self):
         """
@@ -201,7 +203,7 @@ class Ant:
         if self.has_food or self.stamina <= 0:
             self.world.canvas.itemconfigure(self.view_arc, outline="")
         else:
-            self.world.canvas.itemconfigure(
+            self.world.canvas.itemconfig(
                 self.view_arc,
                 start=-self.angle - self.view_angle / 2,
                 extent=self.view_angle,
@@ -325,7 +327,7 @@ class Ant:
         if not check_walls:
             return
 
-        grid_x, grid_y = self.world.worldToGrid(self.pos)
+        grid_x, grid_y = self.world.world_to_grid(self.pos)
 
         if self.world.wall[new_grid_x, new_grid_y]:
             if new_grid_x < grid_x:

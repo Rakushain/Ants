@@ -22,7 +22,7 @@ class Nest:
         self.canvas_id = create_circle(
             self.world.canvas, x, y, self.scale, hex_color)
 
-        self.ants = [Ant(self.world, self, i, species.speed, species.stamina, hex_color)
+        self.ants = [Ant(self.world, self, i, hex_color)
                      for i in range(nAnts)]
 
     def add_food(self, amount):
