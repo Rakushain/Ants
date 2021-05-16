@@ -81,7 +81,12 @@ class MainGUI:
         if self.foodOrNest.get() == FoodOrNest.FOOD and len(
                 self.world.food) < self.world.maxFood:
             if 0 < amount <= 30:
-                self.world.add_food(Food(self.canvas, event.x, event.y, amount))
+                self.world.add_food(
+                    Food(
+                        self.canvas,
+                        event.x,
+                        event.y,
+                        amount))
             else:
                 self.spawn_wrong_value_popup("nourriture", 1, 30, amount)
         elif self.foodOrNest.get() == FoodOrNest.NEST and len(self.world.nests) < self.world.maxNests:

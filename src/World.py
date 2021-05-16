@@ -79,8 +79,8 @@ class World:
 
     def reset(self):
         self.stop()
-        
-        self.main_gui.button_go.configure(text = "Go =>")
+
+        self.main_gui.button_go.configure(text="Go =>")
         self.main_gui.speciesId.set(0)
 
         for nest in self.nests:
@@ -125,7 +125,7 @@ class World:
         if self.charged > 0:
             self.main_gui.on_modif_state_change()
         self.charged += 1
-        
+
         with open(f"worlds/{worldFile}") as file:
             data = file.read()
             world_data = json.loads(data)
@@ -148,7 +148,6 @@ class World:
 
             except BaseException:
                 pass
-        
 
     def write_to_json(self, path, data):
         json.dump(data, path)
@@ -174,9 +173,9 @@ class World:
             self.write_to_json(filepos, data)
         else:
             return
-        
 
-    def modif_species(self, speciesId, speed, stamina, evaporation, view_distance, exploration, comeback, wander_chance, deposit, random_move):
+    def modif_species(self, speciesId, speed, stamina, evaporation, view_distance,
+                      exploration, comeback, wander_chance, deposit, random_move):
         species = self.species[speciesId]
         species.speed = speed
         species.stamina = stamina
@@ -198,7 +197,7 @@ class World:
             for cell in row:
                 cell.reset()
 
-        #print(self.grid)
+        # print(self.grid)
 
     def update(self):
         if not self.started:
