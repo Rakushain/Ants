@@ -144,7 +144,7 @@ class World:
                 if (world_data["wall"]):
                     for wall in world_data["wall"]:
                         self.add_wall(wall[0], wall[1])
-                for traits in world_data["species"]:
+                #for traits in world_data["species"]:
                     
 
             except BaseException:
