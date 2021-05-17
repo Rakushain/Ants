@@ -1,32 +1,51 @@
 {
-  "food": [
-    {
-      "x": 345,
-      "y": 382,
-      "size": 20
-    }
-  ],
-  "nests": [
-    {
-      "x": 345,
-      "y": 188,
-      "size": 20,
-      "species": 0
-    }
-  ],
+  "nests": [{ "x": 345, "y": 188, "size": 20, "species": 0 }],
+  "food": [{ "x": 345, "y": 382, "size": 20 }],
   "wall": [[27, 18]],
   "species": [
     {
-      "speed": 6
+      "speed": 10,
+      "stamina": 350,
+      "evaporation": 500.0,
+      "view_distance": 100,
+      "exploration": 0.1,
+      "comeback": 0.0,
+      "wander_chance": 10,
+      "deposit": 0,
+      "random_move": 0
     },
     {
-      "speed": 4
+      "speed": 4,
+      "stamina": 350,
+      "evaporation": 500.0,
+      "view_distance": 40,
+      "exploration": 0.1,
+      "comeback": 0.0,
+      "wander_chance": 4,
+      "deposit": 0,
+      "random_move": 0
     },
     {
-      "speed": 4
+      "speed": 4,
+      "stamina": 350,
+      "evaporation": 500.0,
+      "view_distance": 40,
+      "exploration": 0.1,
+      "comeback": 0.0,
+      "wander_chance": 4,
+      "deposit": 0,
+      "random_move": 0
     },
     {
-      "speed": 4
+      "speed": 4,
+      "stamina": 350,
+      "evaporation": 500.0,
+      "view_distance": 40,
+      "exploration": 0.1,
+      "comeback": 0.0,
+      "wander_chance": 4,
+      "deposit": 0,
+      "random_move": 0
     }
   ]
 }

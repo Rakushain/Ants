@@ -21,13 +21,11 @@ class Ant:
     has_food = False
     food_amount = 0
     food_target = None
-    view_distance = 40
     view_angle = 120
     # TODO: cringe
     # distance par rapport au centre du nid pour déposer la nourriture
     food_disposal_distance = 4
     # Chance que la fourmi parte dans une direction aléatoire
-    wander_chance = 0.1
 
     def __init__(self, world, nest, ant_id, color):
         """
@@ -56,12 +54,16 @@ class Ant:
         self.wander_strength = 10  # definit la déviation de la trajectoire actuelle
 
         species = self.world.species[self.species_id]
-        self.speed = species.speed  # speed
+        #parametres des fourmis, que l utiisateur peut mofifier
+        self.speed = species.speed  
         self.velocity = self.direction * self.speed * self.world.speed_value
 
         self.base_stamina = species.stamina
         self.stamina = species.stamina
         self.color = color
+        self.wander_chance = species.wander_chance
+        self.comeback = species.comeback
+        self.view_distance = species.view_distance
 
         self.ant_id = f"ANT_{nest.nest_id}_{ant_id}"
 
@@ -71,7 +73,7 @@ class Ant:
                 -10,
                 -10,
                 1,
-                "gray") for i in range(3)]  # TODO: Remove cringe
+                "", outline = "") for i in range(3)]
 
         self.view_arc = self.world.canvas.create_arc(
             self.pos[0] -
@@ -117,7 +119,6 @@ class Ant:
 
         self.sense_pheromones()
 
-        # self.wander()
         self.handle_food()
 
         desired_velocity = self.direction * self.speed * self.world.speed_value
@@ -224,7 +225,6 @@ class Ant:
 
         self.sensors = [sensor_fwd, sensor_left, sensor_right]
 
-        #TODO: cringe
         sensor_fwd_circle, sensor_left_circle, sensor_right_circle = self.sensor_circles
         self.world.canvas.coords(
             sensor_fwd_circle,
@@ -247,8 +247,8 @@ class Ant:
             sensor_right[0] + self.world.cellW + self.pos[0],
             sensor_right[1] + self.world.cellH + self.pos[1])
 
-        for sensor in self.sensor_circles:
-            self.world.canvas.itemconfig(sensor, fill='blue')
+        # for sensor in self.sensor_circles:
+        #     self.world.canvas.itemconfig(sensor, fill='blue')
 
         pheromones = [0, 0, 0, self.wander_chance]
         for i, sensor in enumerate(self.sensors):
@@ -274,22 +274,11 @@ class Ant:
             self.wander()
             return
 
-        self.direction = self.sensor_circles[choice]
-        self.world.canvas.itemconfig(
-            self.sensor_circles[choice], fill='yellow')
+        self.direction = self.sensors[choice]
+        # self.world.canvas.itemconfig(
+        #     self.sensor_circles[choice], fill='yellow')
 
-        # if value_fwd > max(value_left, value_right):
-        #     self.direction = sensor_fwd
-        #     # TODO: cringe
-        #     self.world.canvas.itemconfig(sensor_fwd_circle, fill='yellow')
-        # elif value_left > value_right:
-        #     self.direction = sensor_left
-        #     # TODO: cringe
-        #     self.world.canvas.itemconfig(sensor_left_circle, fill='yellow')
-        # else:
-        #     self.direction = sensor_right
-        #     # TODO: cringe
-        #     self.world.canvas.itemconfig(sensor_right_circle, fill='yellow')
+        
 
     def resetStamina(self):
         """
@@ -303,7 +292,6 @@ class Ant:
         new_grid_x, new_grid_y = self.world.world_to_grid(new_pos)
 
         check_walls = True
-
         if new_pos[0] < 0:
             self.velocity[0] = 1
             self.direction[0] = 1
@@ -345,5 +333,3 @@ class Ant:
                 self.direction[1] = 1
 
             self.velocity = self.velocity * -1
-
-        # if self.world.wall

@@ -3,10 +3,10 @@ import numpy as np
 species_defaults = {
     "speed": {"name": "Vitesse", "min": 1, "max": 10, "value": 4, "fn": int},
     "stamina": {"name": "Endurance", "min": 1, "max": 1000, "value": 350, "fn": int},
-    "evaporation": {"name": "Evaporation", "min": 1, "max": 1000, "value": 1000, "fn": int},
-    "view_distance": {"name": "Portee", "min": 1, "max": 20, "value": 10, "fn": int},
+    "evaporation": {"name": "Temps Evaporation", "min": 1, "max": 1000, "value": 500, "fn": float},
+    "view_distance": {"name": "Portee", "min": 10, "max": 100, "value": 40, "fn": int},
     "exploration": {"name": "Exploration", "min": 0.1, "max": 0.9, "value": 0.1, "fn": float},
-    "comeback": {"name": "Retour", "min": 0, "max": 0, "value": 0, "fn": float},
+    "comeback": {"name": "Retour", "min": 0.1, "max": 0.9, "value": 0.9, "fn": float},
     "wander_chance": {"name": "Suivi phero.", "min": 0, "max": 0, "value": 0, "fn": int},
     "deposit": {"name": "Depot phero.", "min": 0, "max": 0, "value": 0, "fn": int},
     "random_move": {"name": "Freq. alea.", "min": 0, "max": 0, "value": 0, "fn": int},

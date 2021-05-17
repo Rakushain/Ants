@@ -53,11 +53,14 @@ class World:
 
     def start(self):
         for nest in self.nests:
-            species = self.species[nest.species_id]
+            species = self.species[nest.species_id + 1]
             for ant in nest.ants:
                 ant.speed = species.speed
                 ant.stamina = species.stamina
                 ant.base_stamina = species.stamina
+                ant.view_distance = species.view_distance
+                ant.wander_chance = species.wander_chance
+                ant.comeback = 1 - ant.wander_chance
 
         self.started = True
         self.paused = False
@@ -81,7 +84,6 @@ class World:
 
         self.main_gui.button_go.configure(text="Go =>")
         self.main_gui.speciesId.set(0)
-
         for nest in self.nests:
             for ant in nest.ants:
                 self.canvas.delete(ant.view_arc)
@@ -149,8 +151,7 @@ class World:
                     for trait, value in species.items():
                         self.species[i].update_trait(trait,value)
                         self.main_gui.update_species_entry(trait, value)
-        
-                    
+                        
 
             except BaseException:
                 pass
@@ -218,8 +219,6 @@ class World:
         if self.paused:
             return
         self.main_gui.update_species_food()
-        # self.time += (1 * self.main_gui.speed_value.get())
-        # self.main_gui.label_time.config(text=self.main_gui.update_time())
         self.canvas.after(20, self.update)
 
     def world_to_grid(self, pos):

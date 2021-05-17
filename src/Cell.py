@@ -22,15 +22,15 @@ class Cell:
         total_pheromones = 0
         for pheromone in self.pheromones[species_id][:]:
             lifetime = self.world.time - pheromone.creation_time
-            evaporation = lifetime / 1000
+            self.evaporation = (lifetime / self.world.species[species_id].evaporation)
             # par defaut, les pheromones disparaissent apres 1000 frames
 
-            if evaporation > 1:
+            if self.evaporation > 1:
                 self.pheromones[species_id].remove(pheromone)
                 del pheromone
                 continue
 
-            total_pheromones += 1 - evaporation
+            total_pheromones += 1 - self.evaporation
 
         return total_pheromones
 
