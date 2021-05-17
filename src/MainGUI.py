@@ -201,6 +201,12 @@ class MainGUI:
 
         self.previous_species_id.set(self.speciesId.get())
 
+    def update_species_entry(self, trait, value):
+        species = self.world.species[self.speciesId.get()]
+        entry = self.species_traits_entries[trait]
+        entry.delete(0, tk.END)
+        entry.insert(0, species[trait])
+
     def create_species_traits(self, parent):
         frame = tk.Frame(parent)
 

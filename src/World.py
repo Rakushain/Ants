@@ -121,7 +121,7 @@ class World:
     def loadWorld(self, worldFile):
         self.reset()
         self.main_gui.button_go["text"] = "Go =>"
-        if self.charged > 0:
+        if self.charged > 0 and self.main_gui.is_modifying.get() == True:
             self.main_gui.on_modif_state_change()
         self.charged += 1
 
@@ -144,7 +144,12 @@ class World:
                 if (world_data["wall"]):
                     for wall in world_data["wall"]:
                         self.add_wall(wall[0], wall[1])
-                #for traits in world_data["species"]:
+        
+                for i, species in enumerate(world_data["species"]):
+                    for trait, value in species.items():
+                        self.species[i].update_trait(trait,value)
+                        self.main_gui.update_species_entry(trait, value)
+        
                     
 
             except BaseException:
