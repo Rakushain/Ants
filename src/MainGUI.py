@@ -9,6 +9,9 @@ from Species import species_defaults
 
 
 class FoodOrNest:
+    """
+    Classe qui attribue une valeur a food et nest
+    """
     FOOD = 0
     NEST = 1
 
@@ -18,7 +21,19 @@ WORLDS_FOLDER = "worlds"
 
 
 class MainGUI:
+    """
+    Classe représentant le Monde
+    Attributs:
+        canvasW:        Largeur du canvas en pixels
+        canvasH:        Hauteur du canvas en pixels
+        cellsX:         Nombre de cellules de la grille en horizontal
+        cellsY:         Nombre de cellules de la grille en vertical
+        maxFood:        Nombre maximum de nourriture sur le canvas
+        maxNests:       Nombre maximum de nids sur le canvas
+    """
+
     def __init__(self, canvasW, canvasH, cellsX, cellsY, maxFood, maxNests):
+        # Fenetre principale
         self.root = tk.Tk()
         self.root.configure(bg=BG_COLOR)
         self.root.title("Ants")
@@ -26,6 +41,8 @@ class MainGUI:
         self.canvasW = canvasW
         self.canvasH = canvasH
 
+        # Liste des variables de tkinter pour mettre a jour les differents
+        # widgets
         self.speed_value = tk.DoubleVar(value=1)
         self.speed_value.trace_add('write', self.on_modif_speed)
         self.species_food = tk.StringVar()
@@ -33,7 +50,6 @@ class MainGUI:
         self.speciesId = tk.IntVar(value=0)
         self.previous_species_id = tk.IntVar(value=0)
         self.is_modifying = tk.BooleanVar(value=False)
-        # self.is_modifying.trace_add('write', self.update_ants_traits)
 
         self.new_world = 0
 
@@ -52,21 +68,22 @@ class MainGUI:
             maxNests)
 
         self.speciesId.trace_add('write', self.on_species_select)
-
+        # par defaut, on charge le monde avec un nid et une ressource
         self.world.loadWorld("1 espece et 1 ressource.json")
 
         self.root.mainloop()
 
-    def create_world(self):
-        self.world.reset()
-
     def handle_canvas_click(self, event):
+        """
+        Fonction qui permet de detecter un clic sur le canvas
+        """
+        # par defaut, on ajoute un mur avec un clic gauche
         if (not self.is_modifying.get()):
             grid_x, grid_y = self.world.world_to_grid(
                 np.array([event.x, event.y]))
             self.world.add_wall(grid_x, grid_y)
             return
-
+        # si le monde est lance, on ne peux plus rien ajouter sauf des murs
         if self.world.started:
             return
         try:
@@ -74,7 +91,9 @@ class MainGUI:
         except ValueError:
             self.spawn_wrong_value_popup("notint", 0, 0, 0)
             return
-
+        # on regarde si l utilisateur a selectionne de la nourriture ou un nid a placer
+        # et on fait apparaitre un popup si la valeur n'est pas comprise dans
+        # l'intervalle
         if self.foodOrNest.get() == FoodOrNest.FOOD and len(
                 self.world.food) < self.world.maxFood:
             if 0 < amount <= 30:
@@ -96,6 +115,9 @@ class MainGUI:
         self.opt_world_size.configure(state=tk.DISABLED)
 
     def handle_canvas_drag(self, event):
+        """
+        Fonction qui permet de detecter le clic maintenu
+        """
         if self.is_modifying.get():
             return
 
@@ -103,6 +125,9 @@ class MainGUI:
         self.world.add_wall(grid_x, grid_y)
 
     def create_canvas(self):
+        """
+        Creation du canvas
+        """
         frame = tk.Frame(self.root)
 
         self.canvas = tk.Canvas(
@@ -119,6 +144,9 @@ class MainGUI:
         frame.pack(fill="both", expand="yes")
 
     def create_frame_top(self):
+        """
+        Creation de la frame supérieure
+        """
         frame = tk.Frame(self.root)
         frame.pack(fill="both")
 
@@ -137,6 +165,10 @@ class MainGUI:
         frame.pack(fill="both", padx=5, pady=5)
 
     def create_food_or_nest_select(self, parent):
+        """
+        Fonction qui crée les boutons pour placer de la nourriture ou un nid
+        ainsi qu'une entry pour sélectionner la quantité
+        """
         frame = tk.Frame(parent)
 
         self.foodRadio = tk.Radiobutton(
@@ -164,6 +196,10 @@ class MainGUI:
         frame.pack(side=tk.LEFT)
 
     def create_species_select(self, parent):
+        """
+        Fonction qui permet de choisir l'espèce a modifier
+        et crée un bouton modifier / Ok
+        """
         frame = tk.Frame(parent)
 
         self.species_radios = []
@@ -176,7 +212,6 @@ class MainGUI:
                 value=i,
                 state=tk.DISABLED
             )
-            # radio.pack(side=tk.LEFT)
             radio.grid(column=i % 2, row=int(i / 2))
 
             self.species_radios.append(radio)
@@ -190,6 +225,10 @@ class MainGUI:
         frame.pack(side=tk.LEFT)
 
     def on_species_select(self, *_):
+        """
+        Fonction de garder en mémoire les valeurs des caractéristiques des fourmis
+        lorsque l'on change d'espèce
+        """
         self.root.focus()
         previous_species = self.world.species[self.previous_species_id.get()]
         species = self.world.species[self.speciesId.get()]
@@ -202,15 +241,20 @@ class MainGUI:
         self.previous_species_id.set(self.speciesId.get())
 
     def update_species_entry(self, trait, value):
+        """
+        Fonction qui permet de mettre à jour les entries lors du chargement d'un monde
+        """
         entry = self.species_traits_entries[trait]
         entry.delete(0, tk.END)
         entry.insert(0, value)
         # impossibilite de changer les valeurs sur les entries
         # print(entry.value())
         # print(entry.get())
-        
 
     def create_species_traits(self, parent):
+        """
+        Fonction qui crée toutes les entries pour les paramètres des fourmis
+        """
         frame = tk.Frame(parent)
 
         self.species_traits_entries = {}
@@ -240,6 +284,9 @@ class MainGUI:
         frame.pack(side=tk.LEFT)
 
     def validate_species_trait(self, trait, str_val):
+        """
+        Fonction qui vérifie si les valeurs entrées sont conformes
+        """
         trait_defaults = species_defaults[trait]
         min_val = trait_defaults['min']
         max_val = trait_defaults['max']
@@ -258,6 +305,9 @@ class MainGUI:
         return True
 
     def on_modif_state_change(self, *_):
+        """
+        Fonction qui permet d'activer ou de désactiver les widgets en fonction de l'état du bouton Modifier / Ok
+        """
         self.root.focus()
         if self.world.started:
             self.is_modifying.set(False)
@@ -285,9 +335,15 @@ class MainGUI:
                 state=tk.NORMAL if self.is_modifying.get() else tk.DISABLED)
 
     def on_modif_speed(self, *_):
+        """
+        Fonction qui récupère la vitesse du monde
+        """
         self.world.speed_value = self.speed_value.get()
 
     def create_worlds_dropdown(self, parent):
+        """
+        Fonction qui permet de créer un menu d'options contenant les mondes prédéfinis
+        """
         loadWorldOptions = []
         for (_, _, filenames) in walk(WORLDS_FOLDER):
             for filename in filenames:
@@ -314,9 +370,11 @@ class MainGUI:
             text="Sauvegarder",
             command=lambda: self.world.save_world())
         button_save.pack(side=tk.LEFT)
-        # TODO: Load world -> change default values
 
     def create_size_dropdown(self, parent):
+        """
+        Fonction qui permet de créer un menu d'options contenant les tailles du monde (non fonctionnel)
+        """
         OptionList = [
             "20",
             "50",
@@ -341,6 +399,9 @@ class MainGUI:
         self.opt_world_size.pack(side=tk.LEFT, anchor=tk.NW)
 
     def create_sun_check(self, parent):
+        """
+        Fonction qui permet de créer une checkbox pour le mode Soleil (non fonctionnel)
+        """
         frame = tk.Frame(parent)
         self.sun_check = tk.Checkbutton(frame)
         self.sun_check.config(text="Mode Soleil", width=15, font=(
@@ -349,12 +410,18 @@ class MainGUI:
         frame.pack(side=tk.BOTTOM, anchor=tk.SW)
 
     def update_world_size(self, *_):
+        """
+        Fonction qui permet de mettre à jour la taille du monde (non fonctionnelle)
+        """
         # si le canvas est vide, on change la taille du monde
         if len(self.canvas.find_all()) == 2560:
             world_size = self.world_size.get()
             self.world.reset_grid(world_size, world_size)
 
     def create_frame_bottom(self):
+        """
+        Fonction qui crée la frame inférieure
+        """
         frame = tk.Frame(self.root, bg='grey')
 
         self.button_go = tk.Button(
@@ -408,15 +475,21 @@ class MainGUI:
         frame.pack(side="bottom", fill="both", padx=5, pady=5)
 
     def update_time(self):
-        #  Permet de mettre le temps à jour sur le label correspondant
+        """
+        Fonction permettant de mettre le temps à jour sur le label correspondant
+        """
         self.label_time.config(text=int(self.world.time))
 
     def update_new_world_value(self):
+        """
+        Fonction qui vérifie si un nouveau monde a été créé
+        """
         self.new_world = 1
 
     def update_species_food(self):
-        # Fonction utilise pour montrer la repartition de la nourriture entre
-        # especes
+        """
+        Fonction qui crée un label permettant de voir l'évolution de la répartition de la nourriture entre espèces
+        """
         l = [species for species in self.world.species if species.active == True]
         res = ""
         for species in l:
@@ -424,18 +497,27 @@ class MainGUI:
         self.species_food.set(res)
 
     def speed_minus(self):
+        """
+        Diminue la vitesse du monde
+        """
         if 0.25 < self.speed_value.get() <= 2:
             self.speed_value.set(self.speed_value.get() - 0.25)
         else:
             return
 
     def speed_add(self):
+        """
+        Augmente la vitesse du monde
+        """
         if 0.25 <= self.speed_value.get() < 2:
             self.speed_value.set(self.speed_value.get() + 0.25)
         else:
             return
 
     def start_stop(self):
+        """
+        Fonction qui lance ou stoppe le monde avec les widgets nécessaires
+        """
         if self.world.paused or not self.world.started:
             self.is_modifying.set(False)
             self.world.start()
@@ -448,6 +530,9 @@ class MainGUI:
             self.button_go["text"] = "Go =>"
 
     def step(self):
+        """
+        Fonction qui permet de regarder l'évolution frame par frame
+        """
         self.world.next_frame()
         self.button_go["text"] = "Go =>"
 
@@ -485,8 +570,6 @@ class MainGUI:
 
         b = tk.Button(win, text="Ok", command=close_win)
         b.grid(column=0, row=2)
-
-        # win.geometry(("%dx%d%+d%+d" % (250, 50, 750, 400)))
 
     def about(self):
         """
