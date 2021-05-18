@@ -586,12 +586,18 @@ class MainGUI:
                  "des nids, et vous pourrez également modifier les caractéristiques des fourmis de",
                  "l'espèce séléctionnée.",
                  "- Cependant, le nombre maximum de nids et de ressources est limité à 4",
-                 "- Il est également possible de changer la taille de votre monde.",
+                 "- Vous avez la possibilité de sauvegarder votre monde.",
                  "- Vous avez également la possibilité de poser des murs à l'aide du clic gauche de votre",
                  "souris, ce qui obligera les fourmis à trouver un chemin alternatif.",
                  "-Dans le menu en bas de la fenêtre, vous pouvez lancer la simulation ou la stopper lorsque",
                  "celle-ci a déjà été lancée. Un mode pas à pas est également disponible.",
-                 "-La vitesse de la simulation peut etre modifiée, allant de x 0.25 à x 2.0"
+                 "-La vitesse de la simulation peut etre modifiée, allant de x 0.25 à x 2.0",
+                 "- Vous pouvez changer les différentes statistiques des fourmis",
+                 "",
+                 "! Certaines valeurs ne seront pas prises en compte :",
+                 "! Retour, Suivi phero., Dépot Phéro., Freq. alea. .",
+                 "! Il n'est pas encore possible de changer la taille de votre monde.",
+                 "! Le mode Soleil n'est pas encore disponible."
                  ]
         for i in range(len(liste)):
             tk.Label(win, text=liste[i]).pack(side=tk.TOP, anchor=tk.W)
